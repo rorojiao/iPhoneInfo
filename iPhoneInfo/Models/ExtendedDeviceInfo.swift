@@ -50,6 +50,7 @@ struct ExtendedDeviceInfo {
     let DolbyVision: Bool
     let TrueTone: Bool
     let P3WideColor: Bool
+    let hasAlwaysOnDisplay: Bool
 
     // Network Info
     let wifiAddress: String?
@@ -143,13 +144,10 @@ struct ScreenDetails {
     let colorDepth: Int              // bits
     let refreshRate: Int             // Hz
     let hasProMotion: Bool
-    touchSampleRate: Int?            // Hz
+    let touchSampleRate: Int?        // Hz
 
     var description: String {
         var desc = "\(panelType) 面板"
-        if let mfr = manufacturer {
-            desc += " by \(mfr)"
-        }
         desc += ", \(refreshRate)Hz"
         if hasProMotion {
             desc += " ProMotion"
@@ -158,8 +156,8 @@ struct ScreenDetails {
     }
 }
 
-// MARK: - Camera Info
-struct CameraInfo {
+// MARK: - Extended Camera Info
+struct ExtendedCameraInfo {
     let rearCameras: [CameraSpec]
     let frontCamera: CameraSpec
     let rearCameraModuleSerial: String?
@@ -173,30 +171,6 @@ struct CameraInfo {
     let nightMode: Bool
     let deepFusion: Bool
     let smartHDR: Int
-}
-
-struct CameraSpec {
-    let megapixels: Int
-    let type: String          // "主摄", "超广角", "长焦", "潜望式长焦"
-    let aperture: String      // "f/1.78"
-    let sensorSize: String?   // e.g., "1/1.28\"", "1/1.7\""
-    let opticalZoom: Double?  // nil for non-zoom lenses
-    let digitalZoom: Int?     // maximum digital zoom
-    let ois: Bool            // optical image stabilization
-    let manufacturer: String?  // "Sony", "Samsung"
-    let sensorModel: String?
-
-    var description: String {
-        var desc = "\(megapixels)MP \(type)"
-        desc += " \(aperture)"
-        if let size = sensorSize {
-            desc += " \(size)"
-        }
-        if ois {
-            desc += " OIS"
-        }
-        return desc
-    }
 }
 
 // MARK: - Production Info

@@ -8,14 +8,13 @@
 import SwiftUI
 
 struct BenchmarkView: View {
+    @StateObject private var benchmarkService = BenchmarkService.shared
     @State private var selectedTestType: TestType = .quick
-    @State private var isRunning = false
-    @State private var progress: Double = 0
+    @State private var showingResults = false
 
     enum TestType: String, CaseIterable {
         case quick = "快速测试"
         case full = "完整测试"
-        case custom = "自定义"
     }
 
     var body: some View {
@@ -37,78 +36,155 @@ struct BenchmarkView: View {
                         .padding(.horizontal)
                     }
 
-                    // Test Items
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("测试项目")
-                            .font(.headline)
-                            .padding(.horizontal)
+                    // Progress Section
+                    if benchmarkService.isRunning {
+                        VStack(spacing: 16) {
+                            Text(benchmarkService.currentTest)
+                                .font(.title3)
+                                .fontWeight(.medium)
 
-                        VStack(spacing: 0) {
-                            TestItemRow(icon: "cpu", name: "CPU 单核测试", duration: "~30秒")
-                            Divider()
-                            TestItemRow(icon: "cpu.fill", name: "CPU 多核测试", duration: "~30秒")
-                            Divider()
-                            TestItemRow(icon: "cube", name: "GPU Manhattan 3.0", duration: "~2.5分钟")
-                            Divider()
-                            TestItemRow(icon: "cube.fill", name: "GPU Aztec Ruins", duration: "~2.5分钟")
-                            Divider()
-                            TestItemRow(icon: "memorychip", name: "内存测试", duration: "~1分钟")
-                            Divider()
-                            TestItemRow(icon: "internaldrive", name: "存储测试", duration: "~1分钟")
+                            ProgressView(value: benchmarkService.progress)
+                                .progressViewStyle(.linear)
+
+                            Text("\(Int(benchmarkService.progress * 100))%")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.blue)
                         }
+                        .padding()
                         .background(Color(.secondarySystemBackground))
                         .cornerRadius(12)
                         .padding(.horizontal)
+                    }
+
+                    // Results Section
+                    if !benchmarkService.results.isEmpty && !benchmarkService.isRunning {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("测试结果")
+                                .font(.headline)
+                                .padding(.horizontal)
+
+                            VStack(spacing: 0) {
+                                ForEach(benchmarkService.results.indices, id: \.self) { index in
+                                    let result = benchmarkService.results[index]
+
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(result.name)
+                                                .font(.subheadline)
+                                            Text("\(Int(result.duration))秒")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+
+                                        Spacer()
+
+                                        VStack(alignment: .trailing, spacing: 4) {
+                                            Text(result.formattedScore)
+                                                .font(.title3)
+                                                .fontWeight(.semibold)
+                                                .foregroundColor(.blue)
+                                            Text(result.unit)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .padding()
+
+                                    if index < benchmarkService.results.count - 1 {
+                                        Divider()
+                                    }
+                                }
+                            }
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(12)
+                            .padding(.horizontal)
+                        }
+                    }
+
+                    // Test Items (Info Only)
+                    if !benchmarkService.isRunning && benchmarkService.results.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("测试项目")
+                                .font(.headline)
+                                .padding(.horizontal)
+
+                            VStack(spacing: 0) {
+                                TestItemRow(icon: "cpu", name: "CPU 单核测试", duration: selectedTestType == .quick ? "10秒" : "10秒")
+                                if selectedTestType == .full {
+                                    Divider()
+                                    TestItemRow(icon: "cpu.fill", name: "CPU 多核测试", duration: "10秒")
+                                    Divider()
+                                    TestItemRow(icon: "cube", name: "GPU 渲染测试", duration: "15秒")
+                                }
+                                Divider()
+                                TestItemRow(icon: "memorychip", name: "内存读写测试", duration: "10秒")
+                                if selectedTestType == .full {
+                                    Divider()
+                                    TestItemRow(icon: "internaldrive", name: "存储读写测试", duration: "~5秒")
+                                }
+                            }
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(12)
+                            .padding(.horizontal)
+                        }
                     }
 
                     // Device Status
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("设备状态")
-                            .font(.headline)
-                            .padding(.horizontal)
+                    if !benchmarkService.isRunning {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("设备状态")
+                                .font(.headline)
+                                .padding(.horizontal)
 
-                        HStack(spacing: 30) {
-                            StatusItem(icon: "battery.100percent", label: "电量", value: "82%")
-                            StatusItem(icon: "thermometer", label: "温度", value: "36°C")
+                            HStack(spacing: 30) {
+                                StatusItem(icon: "battery.100", label: "电量", value: "\(Int(UIDevice.current.batteryLevel * 100))%")
+                                StatusItem(icon: "thermometer", label: "温度", value: "\(Int(ThermalService.shared.currentTemperature))°C")
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(12)
+                            .padding(.horizontal)
                         }
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
                     }
 
                     // Start Button
-                    Button(action: {
-                        startBenchmark()
-                    }) {
-                        VStack(spacing: 8) {
-                            if isRunning {
-                                ProgressView()
-                                    .tint(.white)
-                                Text("测试中...")
-                            } else {
+                    if !benchmarkService.isRunning {
+                        Button(action: {
+                            startBenchmark()
+                        }) {
+                            VStack(spacing: 8) {
                                 Image(systemName: "play.circle.fill")
                                     .font(.title)
                                 Text("开始测试")
+                                    .font(.headline)
                             }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.blue, Color.purple]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(isRunning ? Color.gray : Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
-                    .disabled(isRunning)
 
                     // Test Info
-                    VStack(alignment: .leading, spacing: 8) {
-                        InfoBullet(text: "预计耗时: 约 \(estimatedTime)")
-                        InfoBullet(text: "建议充电使用以获得最佳结果")
-                        InfoBullet(text: "测试期间请保持屏幕常亮")
+                    if benchmarkService.results.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            InfoBullet(text: "预计耗时: \(estimatedTime)")
+                            InfoBullet(text: "建议充电使用以获得最佳结果")
+                            InfoBullet(text: "测试期间请保持屏幕常亮")
+                            InfoBullet(text: "测试将真实运行计算密集型任务")
+                        }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
                 }
                 .padding(.vertical)
             }
@@ -118,17 +194,15 @@ struct BenchmarkView: View {
 
     private var estimatedTime: String {
         switch selectedTestType {
-        case .quick: return "2 分钟"
-        case .full: return "10 分钟"
-        case .custom: return "自定义"
+        case .quick: return "约 30 秒"
+        case .full: return "约 1 分钟"
         }
     }
 
     private func startBenchmark() {
-        isRunning = true
-        // TODO: Implement actual benchmark
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            isRunning = false
+        let type: BenchmarkService.BenchmarkType = selectedTestType == .quick ? .quick : .full
+        benchmarkService.runBenchmark(type: type) {
+            // 测试完成
         }
     }
 }
@@ -154,8 +228,9 @@ struct TestItemRow: View {
 
             Spacer()
 
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(.green)
+            Image(systemName: "clock")
+                .foregroundColor(.secondary)
+                .font(.caption)
         }
         .padding()
         .contentShape(Rectangle())

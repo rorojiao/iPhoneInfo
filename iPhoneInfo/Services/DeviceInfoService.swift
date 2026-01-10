@@ -94,11 +94,11 @@ class DeviceInfoService: ObservableObject {
     private func mapModelToDeviceName(_ model: String) -> String {
         // Complete iPhone model mapping as of 2026
         let modelMap: [String: String] = [
-            // iPhone 16 Series (2024)
-            "iPhone17,1": "iPhone 16",
-            "iPhone17,2": "iPhone 16 Plus",
-            "iPhone17,3": "iPhone 16 Pro",
-            "iPhone17,4": "iPhone 16 Pro Max",
+            // iPhone 16 Series (2024) - 官方正确映射
+            "iPhone17,1": "iPhone 16 Pro",
+            "iPhone17,2": "iPhone 16 Pro Max",
+            "iPhone17,3": "iPhone 16",
+            "iPhone17,4": "iPhone 16 Plus",
 
             // iPhone 15 Series (2023)
             "iPhone16,1": "iPhone 15",
@@ -173,18 +173,18 @@ class DeviceInfoService: ObservableObject {
                         model == "iPhone14,8" || model == "iPhone14,5" || // iPhone 13 Pro (alt identifiers)
                         model == "iPhone15,2" || model == "iPhone15,3" || // iPhone 14 Pro, 14 Pro Max
                         model == "iPhone16,3" || model == "iPhone16,4" || // iPhone 15 Pro, 15 Pro Max
-                        model == "iPhone17,3" || model == "iPhone17,4"    // iPhone 16 Pro, 16 Pro Max
+                        model == "iPhone17,3" || model == "iPhone17,2"    // iPhone 16 Pro, 16 Pro Max (修正)
 
         // ProMotion display (120Hz) on Pro models from iPhone 13 Pro onwards
         let hasProMotion = model == "iPhone14,2" || model == "iPhone14,3" || // iPhone 13 Pro
                           model == "iPhone15,2" || model == "iPhone15,3" || // iPhone 14 Pro
                           model == "iPhone16,3" || model == "iPhone16,4" || // iPhone 15 Pro
-                          model == "iPhone17,3" || model == "iPhone17,4"    // iPhone 16 Pro
+                          model == "iPhone17,3" || model == "iPhone17,2"    // iPhone 16 Pro, 16 Pro Max (修正)
 
         // Always-On Display from iPhone 14 Pro onwards
         let hasAlwaysOnDisplay = model == "iPhone15,2" || model == "iPhone15,3" || // iPhone 14 Pro
                                   model == "iPhone16,3" || model == "iPhone16,4" || // iPhone 15 Pro
-                                  model == "iPhone17,3" || model == "iPhone17,4"    // iPhone 16 Pro
+                                  model == "iPhone17,3" || model == "iPhone17,2"    // iPhone 16 Pro, 16 Pro Max (修正)
 
         let info = HardwareInfo(
             cpuModel: cpuModel,
@@ -206,9 +206,9 @@ class DeviceInfoService: ObservableObject {
 
     private func getCPUModel() -> String {
         let model = getDeviceModel()
-        // iPhone 16 Series (2024) - A18 chip
+        // iPhone 16 Series (2024) - A18 chip - 官方正确映射
         if model.hasPrefix("iPhone17,") {
-            if model.contains("iPhone17,3") || model.contains("iPhone17,4") {
+            if model.contains("iPhone17,1") || model.contains("iPhone17,2") {
                 return "A18 Pro"  // iPhone 16 Pro/Pro Max
             }
             return "A18"  // iPhone 16/Plus
@@ -234,10 +234,10 @@ class DeviceInfoService: ObservableObject {
 
     private func getGPUCores() -> Int {
         let model = getDeviceModel()
-        // iPhone 16 Pro series - 6 cores
-        if model == "iPhone17,3" || model == "iPhone17,4" { return 6 }
-        // iPhone 16 standard - 5 cores
-        if model == "iPhone17,1" || model == "iPhone17,2" { return 5 }
+        // iPhone 16 Pro series - 6 cores GPU
+        if model == "iPhone17,1" || model == "iPhone17,2" { return 6 }
+        // iPhone 16 standard - 5 cores GPU
+        if model == "iPhone17,3" || model == "iPhone17,4" { return 5 }
         // iPhone 15 Pro series - 6 cores
         if model == "iPhone16,3" || model == "iPhone16,4" { return 6 }
         // iPhone 15 standard - 5 cores
@@ -393,11 +393,11 @@ class DeviceInfoService: ObservableObject {
 
     private func getScreenSize() -> Double {
         let model = getDeviceModel()
-        // iPhone 16 Series
-        if model == "iPhone17,1" { return 6.1 }  // iPhone 16
-        if model == "iPhone17,2" { return 6.7 }  // iPhone 16 Plus
-        if model == "iPhone17,3" { return 6.3 }  // iPhone 16 Pro
-        if model == "iPhone17,4" { return 6.9 }  // iPhone 16 Pro Max
+        // iPhone 16 Series - 官方正确映射
+        if model == "iPhone17,1" { return 6.3 }  // iPhone 16 Pro
+        if model == "iPhone17,2" { return 6.9 }  // iPhone 16 Pro Max
+        if model == "iPhone17,3" { return 6.1 }  // iPhone 16
+        if model == "iPhone17,4" { return 6.7 }  // iPhone 16 Plus
 
         // iPhone 15 Series
         if model == "iPhone16,1" { return 6.1 }  // iPhone 15

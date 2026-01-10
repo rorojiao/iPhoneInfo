@@ -40,6 +40,7 @@ enum AppTab: String, CaseIterable {
     case monitor = "监控"
     case compare = "对比"
     case settings = "设置"
+    case debug = "调试"
 
     var icon: String {
         switch self {
@@ -48,6 +49,7 @@ enum AppTab: String, CaseIterable {
         case .monitor: return "gauge.with.dots.needle.67percent"
         case .compare: return "chart.xyaxis.line"
         case .settings: return "gearshape.fill"
+        case .debug: return "ladybug.fill"
         }
     }
 }

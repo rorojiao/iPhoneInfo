@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject private var deviceInfoService = DeviceInfoService.shared
+    @StateObject private var thermalService = ThermalService.shared
     @State private var selectedSection: InfoSection? = nil
     @State private var extendedInfo: ExtendedDeviceInfo?
 
@@ -25,6 +26,18 @@ struct HomeView: View {
         NavigationView {
             ScrollView {
                 LazyVStack(spacing: 16) {
+                    // 快速状态卡片
+                    QuickStatusCard(
+                        deviceInfo: deviceInfoService.deviceInfo,
+                        batteryInfo: deviceInfoService.batteryInfo,
+                        thermalService: thermalService
+                    )
+                    .padding(.horizontal)
+
+                    // 温度监控卡片
+                    TemperatureMonitorCard(thermalService: thermalService)
+                        .padding(.horizontal)
+
                     // Device Header Card
                     DeviceHeaderCard(
                         deviceInfo: deviceInfoService.deviceInfo,
@@ -51,6 +64,10 @@ struct HomeView: View {
             .navigationTitle("设备信息")
             .onAppear {
                 loadExtendedInfo()
+                thermalService.startMonitoring()
+            }
+            .onDisappear {
+                thermalService.stopMonitoring()
             }
             .refreshable {
                 deviceInfoService.loadAllInformation()
@@ -231,9 +248,8 @@ struct DeviceSectionContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            InfoRow(label: "设备名称", value: deviceInfo?.name ?? "Unknown")
+            InfoRow(label: "设备名称", value: extendedInfo?.deviceType ?? deviceInfo?.deviceType ?? "Unknown")
             InfoRow(label: "设备型号", value: deviceInfo?.model ?? "Unknown")
-            InfoRow(label: "设备类型", value: extendedInfo?.deviceType ?? deviceInfo?.deviceType ?? "Unknown")
             InfoRow(label: "营销名称", value: extendedInfo?.marketingName ?? "")
             InfoRow(label: "型号号码", value: extendedInfo?.modelNumber ?? "Unknown")
             InfoRow(label: "序列号", value: extendedInfo?.serialNumber ?? "Unknown")
@@ -445,6 +461,217 @@ struct DetailsSectionContent: View {
                     .foregroundColor(.secondary)
             }
         }
+    }
+}
+
+// MARK: - Quick Status Card
+struct QuickStatusCard: View {
+    let deviceInfo: DeviceInfo?
+    let batteryInfo: BatteryInfo?
+    @ObservedObject var thermalService: ThermalService
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // 设备名称和状态
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("iPhone 16 Pro Max")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    Text(thermalService.thermalState.emoji + " " + thermalService.thermalState.rawValue)
+                        .font(.caption)
+                        .foregroundColor(thermalService.thermalState.color)
+                }
+                Spacer()
+                if let battery = batteryInfo {
+                    HStack(spacing: 4) {
+                        Image(systemName: batteryIcon(for: battery.state))
+                            .foregroundColor(batteryColor(for: battery.state))
+                        Text("\(battery.levelPercentage)%")
+                            .font(.headline)
+                    }
+                }
+            }
+
+            Divider()
+
+            // 快速状态指标
+            HStack(spacing: 20) {
+                // 温度
+                QuickStatusIndicator(
+                    icon: "thermometer",
+                    value: String(format: "%.0f°", thermalService.currentTemperature),
+                    label: "温度",
+                    color: thermalService.thermalState.color
+                )
+
+                // 发热指数
+                QuickStatusIndicator(
+                    icon: "flame.fill",
+                    value: String(format: "%.0f", thermalService.heatIndex),
+                    label: "发热指数",
+                    color:heatIndexColor
+                )
+
+                // CPU占用
+                QuickStatusIndicator(
+                    icon: "cpu",
+                    value: String(format: "%.0f%%", thermalService.cpuUsage),
+                    label: "CPU",
+                    color: .blue
+                )
+            }
+
+            // 状态提示
+            if thermalService.thermalState != .nominal {
+                HStack {
+                    Image(systemName: thermalService.thermalState.emoji)
+                    Text(thermalService.thermalState.rawValue)
+                        .font(.subheadline)
+                    Spacer()
+                    Text(thermalService.getTemperatureTrend().arrow)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.top, 4)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+    }
+
+    private func batteryIcon(for state: UIDevice.BatteryState) -> String {
+        switch state {
+        case .charging: return "battery.100percent.bolt"
+        case .full: return "battery.100percent"
+        case .unplugged: return "battery.25percent"
+        default: return "battery.0percent"
+        }
+    }
+
+    private func batteryColor(for state: UIDevice.BatteryState) -> Color {
+        switch state {
+        case .charging, .full: return .green
+        default: return .orange
+        }
+    }
+
+    private var heatIndexColor: Color {
+        switch thermalService.heatIndex {
+        case 0..<25: return .green
+        case 25..<50: return .yellow
+        case 50..<75: return .orange
+        default: return .red
+        }
+    }
+}
+
+// MARK: - Quick Status Indicator
+struct QuickStatusIndicator: View {
+    let icon: String
+    let value: String
+    let label: String
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundColor(color)
+            Text(value)
+                .font(.headline)
+                .foregroundColor(.primary)
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+    }
+}
+
+// MARK: - Temperature Monitor Card
+struct TemperatureMonitorCard: View {
+    @ObservedObject var thermalService: ThermalService
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // 标题
+            HStack {
+                Image(systemName: "thermometer")
+                    .foregroundColor(.blue)
+                Text("温度监控")
+                    .font(.headline)
+                Spacer()
+                Text(thermalService.thermalState.emoji + " " + thermalService.thermalState.rawValue)
+                    .font(.caption)
+                    .foregroundColor(thermalService.thermalState.color)
+            }
+
+            Divider()
+
+            // 温度显示
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("\(String(format: "%.1f", thermalService.currentTemperature))°C")
+                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .foregroundColor(thermalService.thermalState.color)
+                    Text("发热指数: \(thermalService.heatIndexDescription)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                // 温度趋势
+                let trend = thermalService.getTemperatureTrend()
+                VStack(spacing: 4) {
+                    Text(trend.arrow)
+                        .font(.title)
+                    Text(trend.description)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            // 温度预测
+            if let prediction = thermalService.predictTemperature(minutes: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                            .font(.caption)
+                        Text("预测10分钟后: \(String(format: "%.1f", prediction.temperature))°C")
+                            .font(.caption)
+                        Text("(置信度: \(prediction.confidence))")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    .foregroundColor(.secondary)
+                }
+            }
+
+            // 建议
+            if !thermalService.getRecommendations().isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("建议:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    ForEach(thermalService.getRecommendations().prefix(3), id: \.self) { rec in
+                        HStack(alignment: .top, spacing: 6) {
+                            Text("•")
+                                .foregroundColor(.secondary)
+                            Text(rec)
+                                .font(.caption)
+                                .foregroundColor(.primary)
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
     }
 }
 

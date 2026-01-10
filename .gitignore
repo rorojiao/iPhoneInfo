@@ -1,0 +1,30 @@
+# Xcode
+.DS_Store
+*/.DS_Store
+*.xcuserstate
+*.xcuserdatad
+*.xcuserstate
+UserInterfaceState.xcuserstate
+xcuserdata/
+*.moved-aside
+DerivedData/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# Build
+build/
+*.build
+
+# Swift Package Manager
+.swiftpm/
+.build/
+
+# CocoaPods
+Pods/
+
+# Icon generation scripts
+generate_*.swift
+generate_*.py
+AppIcon.svg
