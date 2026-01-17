@@ -244,9 +244,7 @@ class ExtendedDeviceDetailsService {
     }
 
     private func getDeviceColor() -> String {
-        // Color detection is not possible via API
-        // Return based on common colors
-        return "黑色钛金属" // Default or could be user-selectable
+        return "未知（系统限制）"
     }
 
     private func getStorageCapacity() -> (total: UInt64, available: UInt64) {
@@ -314,32 +312,39 @@ class ExtendedDeviceDetailsService {
 
     // MARK: - Network Info
     private func getWiFiAddress() -> String? {
-        // Get WiFi address from network interfaces
-        var address: String?
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
-
         guard getifaddrs(&ifaddr) == 0 else { return nil }
         defer { freeifaddrs(ifaddr) }
 
+        var ipv4: String?
+        var ipv6: String?
+
         var ptr = ifaddr
         while ptr != nil {
-            defer { ptr = ptr!.pointee.ifa_next }
+            defer { ptr = ptr?.pointee.ifa_next }
+            guard let interface = ptr?.pointee else { continue }
+            guard let addr = interface.ifa_addr else { continue }
 
-            let interface = ptr!.pointee
-            let addrFamily = interface.ifa_addr.pointee.sa_family
+            let name = String(cString: interface.ifa_name)
+            guard name == "en0" else { continue }
 
-            if addrFamily == UInt8(AF_LINK) {
-                let name = String(cString: interface.ifa_name)
-                if name == "en0" { // WiFi interface
-                    var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-                    getnameinfo(interface.ifa_addr, socklen_t(interface.ifa_addr.pointee.sa_len),
-                               &hostname, socklen_t(hostname.count),
-                               nil, socklen_t(0), NI_NUMERICHOST)
-                    address = String(cString: hostname)
+            let family = Int32(addr.pointee.sa_family)
+            if family == AF_INET {
+                var addrIn = addr.withMemoryRebound(to: sockaddr_in.self, capacity: 1) { $0.pointee }
+                var buffer = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
+                if inet_ntop(AF_INET, &addrIn.sin_addr, &buffer, socklen_t(INET_ADDRSTRLEN)) != nil {
+                    ipv4 = String(cString: buffer)
+                }
+            } else if family == AF_INET6 {
+                var addrIn6 = addr.withMemoryRebound(to: sockaddr_in6.self, capacity: 1) { $0.pointee }
+                var buffer = [CChar](repeating: 0, count: Int(INET6_ADDRSTRLEN))
+                if inet_ntop(AF_INET6, &addrIn6.sin6_addr, &buffer, socklen_t(INET6_ADDRSTRLEN)) != nil {
+                    ipv6 = String(cString: buffer)
                 }
             }
         }
-        return address ?? "无法获取"
+
+        return ipv4 ?? ipv6
     }
 
     private func getBluetoothAddress() -> String? {

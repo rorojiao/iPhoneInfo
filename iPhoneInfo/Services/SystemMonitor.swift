@@ -23,6 +23,10 @@ struct SystemMetrics {
     let batteryLevel: Float           // 0-1
     let batteryState: UIDevice.BatteryState
     let thermalState: ThermalState
+    let processThermalState: ProcessInfo.ThermalState
+    let lowPowerModeEnabled: Bool
+    let wifiIP: String?
+    let cellularIP: String?
     let timestamp: Date
 
     var isThrottling: Bool {
@@ -78,6 +82,13 @@ class SystemMonitor: ObservableObject {
     private var monitorTimer: Timer?
     private var previousNetworkData: (iface: String, received: UInt64, sent: UInt64)?
 
+    private var cpuHistory: [Double] = []
+    private var memoryHistory: [Double] = []
+    private var gpuHistory: [Double] = []
+    private var thermalHistory: [ThermalState] = []
+    private let maxHistoryCount = 60
+
+
     private init() {
         // Initialize with current metrics
         updateMetrics()
@@ -116,11 +127,18 @@ class SystemMonitor: ObservableObject {
             let diskUsage = diskTotal > 0 ? Double(diskUsed) / Double(diskTotal) * 100 : 0
             let networkActivity = self.getNetworkActivity()
             let thermalState = self.getThermalState()
+            let processThermalState = ProcessInfo.processInfo.thermalState
+            let lowPowerModeEnabled = ProcessInfo.processInfo.isLowPowerModeEnabled
+
+            let wifiIP = self.getIPAddress(interfaceName: "en0")
+            let cellularIP = self.getIPAddress(interfaceName: "pdp_ip0")
 
             DispatchQueue.main.async {
                 UIDevice.current.isBatteryMonitoringEnabled = true
                 let batteryLevel = UIDevice.current.batteryLevel
                 let batteryState = UIDevice.current.batteryState
+
+                self.appendHistory(cpu: cpuUsage, memory: memoryUsage, gpu: gpuUsage, thermal: thermalState)
 
                 self.currentMetrics = SystemMetrics(
                     cpuUsage: cpuUsage,
@@ -135,6 +153,10 @@ class SystemMonitor: ObservableObject {
                     batteryLevel: batteryLevel >= 0 ? batteryLevel : 0,
                     batteryState: batteryState,
                     thermalState: thermalState,
+                    processThermalState: processThermalState,
+                    lowPowerModeEnabled: lowPowerModeEnabled,
+                    wifiIP: wifiIP,
+                    cellularIP: cellularIP,
                     timestamp: Date()
                 )
             }
@@ -238,6 +260,55 @@ class SystemMonitor: ObservableObject {
         }
 
         return min(gpuLoad, 100)
+    }
+
+    private func appendHistory(cpu: Double, memory: Double, gpu: Double, thermal: ThermalState) {
+        cpuHistory.append(cpu)
+        memoryHistory.append(memory)
+        gpuHistory.append(gpu)
+        thermalHistory.append(thermal)
+
+        if cpuHistory.count > maxHistoryCount { cpuHistory.removeFirst() }
+        if memoryHistory.count > maxHistoryCount { memoryHistory.removeFirst() }
+        if gpuHistory.count > maxHistoryCount { gpuHistory.removeFirst() }
+        if thermalHistory.count > maxHistoryCount { thermalHistory.removeFirst() }
+    }
+
+    private func getIPAddress(interfaceName: String) -> String? {
+        var address: String?
+        var ifaddr: UnsafeMutablePointer<ifaddrs>?
+
+        guard getifaddrs(&ifaddr) == 0 else { return nil }
+        defer { freeifaddrs(ifaddr) }
+
+        var ptr = ifaddr
+        while ptr != nil {
+            defer { ptr = ptr?.pointee.ifa_next }
+            guard let interface = ptr?.pointee else { continue }
+            guard let addr = interface.ifa_addr else { continue }
+
+            let name = String(cString: interface.ifa_name)
+            guard name == interfaceName else { continue }
+
+            let family = Int32(addr.pointee.sa_family)
+            if family == AF_INET {
+                var addrIn = addr.withMemoryRebound(to: sockaddr_in.self, capacity: 1) { $0.pointee }
+                var buffer = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
+                if inet_ntop(AF_INET, &addrIn.sin_addr, &buffer, socklen_t(INET_ADDRSTRLEN)) != nil {
+                    address = String(cString: buffer)
+                    break
+                }
+            } else if family == AF_INET6 {
+                var addrIn6 = addr.withMemoryRebound(to: sockaddr_in6.self, capacity: 1) { $0.pointee }
+                var buffer = [CChar](repeating: 0, count: Int(INET6_ADDRSTRLEN))
+                if inet_ntop(AF_INET6, &addrIn6.sin6_addr, &buffer, socklen_t(INET6_ADDRSTRLEN)) != nil {
+                    address = String(cString: buffer)
+                    break
+                }
+            }
+        }
+
+        return address
     }
 
     // MARK: - Disk Usage

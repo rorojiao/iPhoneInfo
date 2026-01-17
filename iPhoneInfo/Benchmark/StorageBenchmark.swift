@@ -116,7 +116,7 @@ class StorageBenchmark {
 
         // Create test data pattern
         let chunkSize = 1024 * 1024  // 1MB chunks
-        let chunk = Data([UInt8](repeating: 0xAA, count: chunkSize)
+        let chunk = Data([UInt8](repeating: 0xAA, count: chunkSize))
 
         let startTime = Date()
 
@@ -342,7 +342,7 @@ class StorageBenchmark {
         try? fileManager.removeItem(at: url)
 
         let chunkSize = 1024 * 1024  // 1MB chunks
-        let chunk = Data([UInt8](repeating: 0xFF, count: chunkSize)
+        let chunk = Data([UInt8](repeating: 0xFF, count: chunkSize))
 
         do {
             let fileHandle = try FileHandle(forWritingTo: url)
@@ -370,7 +370,7 @@ class StorageBenchmark {
         var filesCreated = 0
         var totalData = UInt64(0)
         let fileSize = 1024 * 1024  // 1MB files
-        let testData = Data([UInt8](repeating: 0xDD, count: fileSize)
+        let testData = Data([UInt8](repeating: 0xDD, count: fileSize))
 
         while Date().timeIntervalSince(startTime) < targetDuration {
             let fileURL = testDirectory.appendingPathComponent("stress_\(filesCreated).dat")

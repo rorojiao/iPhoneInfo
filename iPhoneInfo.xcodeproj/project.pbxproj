@@ -8,26 +8,67 @@
 
 /* Begin PBXBuildFile section */
 		A1 /* iPhoneInfoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2 /* iPhoneInfoApp.swift */; };
+		A100 /* SustainedGamingTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99 /* SustainedGamingTestView.swift */; };
 		A11 /* BenchmarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12 /* BenchmarkView.swift */; };
+		A111 /* HUDTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A101 /* HUDTheme.swift */; };
+		A112 /* HUDPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A102 /* HUDPanel.swift */; };
+		A113 /* HUDScanlineOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A103 /* HUDScanlineOverlay.swift */; };
+		A114 /* HUDGlitchText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A104 /* HUDGlitchText.swift */; };
+		A115 /* HUDBg.swift in Sources */ = {isa = PBXBuildFile; fileRef = A105 /* HUDBg.swift */; };
+		A116 /* HUDRingGauge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A106 /* HUDRingGauge.swift */; };
+		A117 /* HUDMiniStat.swift in Sources */ = {isa = PBXBuildFile; fileRef = A107 /* HUDMiniStat.swift */; };
+		A118 /* HUDRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A108 /* HUDRow.swift */; };
+		A119 /* HUDPulseBorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A109 /* HUDPulseBorder.swift */; };
+		A123 /* HUDNoiseOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A120 /* HUDNoiseOverlay.swift */; };
+		A124 /* HUDRadarSweep.swift in Sources */ = {isa = PBXBuildFile; fileRef = A121 /* HUDRadarSweep.swift */; };
+		A125 /* HUDGridOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A122 /* HUDGridOverlay.swift */; };
+		A131 /* ROGComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A130 /* ROGComponents.swift */; };
+		A133 /* HUDCircuitOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A132 /* HUDCircuitOverlay.swift */; };
 		A13 /* MonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A14 /* MonitorView.swift */; };
 		A15 /* CompareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A16 /* CompareView.swift */; };
 		A17 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A18 /* SettingsView.swift */; };
 		A3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4 /* ContentView.swift */; };
 		A5 /* DeviceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6 /* DeviceModels.swift */; };
-		A7 /* DeviceInfoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8 /* DeviceInfoService.swift */; };
-		A9 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10 /* HomeView.swift */; };
 		A50 /* ExtendedDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A48 /* ExtendedDeviceInfo.swift */; };
 		A51 /* ExtendedDeviceDetailsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A49 /* ExtendedDeviceDetailsService.swift */; };
 		A60 /* ThermalService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54 /* ThermalService.swift */; };
 		A61 /* PerformanceModeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55 /* PerformanceModeService.swift */; };
 		A62 /* DeviceDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56 /* DeviceDebugView.swift */; };
-		A63 /* BenchmarkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58 /* BenchmarkService.swift */; };
+		A7 /* DeviceInfoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8 /* DeviceInfoService.swift */; };
 		A70 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A57 /* Assets.xcassets */; };
+		A81 /* CoreDataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A71 /* CoreDataModels.swift */; };
+		A82 /* SensorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A72 /* SensorService.swift */; };
+		A83 /* SystemMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A73 /* SystemMonitor.swift */; };
+		A84 /* BenchmarkCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A74 /* BenchmarkCoordinator.swift */; };
+		A85 /* CPUBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = A75 /* CPUBenchmark.swift */; };
+		A86 /* MemoryBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = A76 /* MemoryBenchmark.swift */; };
+		A87 /* StorageBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = A77 /* StorageBenchmark.swift */; };
+		A88 /* MetalBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = A78 /* MetalBenchmark.swift */; };
+		A9 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10 /* HomeView.swift */; };
+		A90 /* iPhoneInfo.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A79 /* iPhoneInfo.xcdatamodeld */; };
+		A92 /* GameExperienceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91 /* GameExperienceService.swift */; };
+		A93 /* NetworkLatencyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A94 /* NetworkLatencyService.swift */; };
+		A95 /* GamerDashboardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A96 /* GamerDashboardService.swift */; };
+		A98 /* GamerHomeDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A97 /* GamerHomeDashboardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A10 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		A101 /* HUDTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDTheme.swift; sourceTree = "<group>"; };
+		A102 /* HUDPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDPanel.swift; sourceTree = "<group>"; };
+		A103 /* HUDScanlineOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDScanlineOverlay.swift; sourceTree = "<group>"; };
+		A104 /* HUDGlitchText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDGlitchText.swift; sourceTree = "<group>"; };
+		A105 /* HUDBg.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDBg.swift; sourceTree = "<group>"; };
+		A106 /* HUDRingGauge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDRingGauge.swift; sourceTree = "<group>"; };
+		A107 /* HUDMiniStat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDMiniStat.swift; sourceTree = "<group>"; };
+		A108 /* HUDRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDRow.swift; sourceTree = "<group>"; };
+		A109 /* HUDPulseBorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDPulseBorder.swift; sourceTree = "<group>"; };
 		A12 /* BenchmarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkView.swift; sourceTree = "<group>"; };
+		A120 /* HUDNoiseOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDNoiseOverlay.swift; sourceTree = "<group>"; };
+		A121 /* HUDRadarSweep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDRadarSweep.swift; sourceTree = "<group>"; };
+		A122 /* HUDGridOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDGridOverlay.swift; sourceTree = "<group>"; };
+		A130 /* ROGComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ROGComponents.swift; sourceTree = "<group>"; };
+		A132 /* HUDCircuitOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDCircuitOverlay.swift; sourceTree = "<group>"; };
 		A14 /* MonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonitorView.swift; sourceTree = "<group>"; };
 		A16 /* CompareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareView.swift; sourceTree = "<group>"; };
 		A18 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -35,15 +76,28 @@
 		A20 /* iPhoneInfo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iPhoneInfo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A21 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		A6 /* DeviceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceModels.swift; sourceTree = "<group>"; };
-		A8 /* DeviceInfoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceInfoService.swift; sourceTree = "<group>"; };
 		A48 /* ExtendedDeviceInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtendedDeviceInfo.swift; sourceTree = "<group>"; };
 		A49 /* ExtendedDeviceDetailsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtendedDeviceDetailsService.swift; sourceTree = "<group>"; };
 		A54 /* ThermalService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalService.swift; sourceTree = "<group>"; };
 		A55 /* PerformanceModeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceModeService.swift; sourceTree = "<group>"; };
 		A56 /* DeviceDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDebugView.swift; sourceTree = "<group>"; };
 		A57 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		A58 /* BenchmarkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkService.swift; sourceTree = "<group>"; };
+		A6 /* DeviceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceModels.swift; sourceTree = "<group>"; };
+		A71 /* CoreDataModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataModels.swift; sourceTree = "<group>"; };
+		A72 /* SensorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorService.swift; sourceTree = "<group>"; };
+		A73 /* SystemMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMonitor.swift; sourceTree = "<group>"; };
+		A74 /* BenchmarkCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkCoordinator.swift; sourceTree = "<group>"; };
+		A75 /* CPUBenchmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPUBenchmark.swift; sourceTree = "<group>"; };
+		A76 /* MemoryBenchmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryBenchmark.swift; sourceTree = "<group>"; };
+		A77 /* StorageBenchmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageBenchmark.swift; sourceTree = "<group>"; };
+		A78 /* MetalBenchmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalBenchmark.swift; sourceTree = "<group>"; };
+		A79 /* iPhoneInfo.xcdatamodeld */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodeld; path = iPhoneInfo.xcdatamodeld; sourceTree = "<group>"; };
+		A8 /* DeviceInfoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceInfoService.swift; sourceTree = "<group>"; };
+		A91 /* GameExperienceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameExperienceService.swift; sourceTree = "<group>"; };
+		A94 /* NetworkLatencyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkLatencyService.swift; sourceTree = "<group>"; };
+		A96 /* GamerDashboardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamerDashboardService.swift; sourceTree = "<group>"; };
+		A97 /* GamerHomeDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamerHomeDashboardView.swift; sourceTree = "<group>"; };
+		A99 /* SustainedGamingTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SustainedGamingTestView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +111,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A110 /* HUD */ = {
+			isa = PBXGroup;
+			children = (
+				A105 /* HUDBg.swift */,
+				A132 /* HUDCircuitOverlay.swift */,
+				A122 /* HUDGridOverlay.swift */,
+				A104 /* HUDGlitchText.swift */,
+				A107 /* HUDMiniStat.swift */,
+				A120 /* HUDNoiseOverlay.swift */,
+				A102 /* HUDPanel.swift */,
+				A109 /* HUDPulseBorder.swift */,
+				A121 /* HUDRadarSweep.swift */,
+				A106 /* HUDRingGauge.swift */,
+				A130 /* ROGComponents.swift */,
+				A108 /* HUDRow.swift */,
+				A103 /* HUDScanlineOverlay.swift */,
+				A101 /* HUDTheme.swift */,
+			);
+			path = HUD;
+			sourceTree = "<group>";
+		};
 		A23 = {
 			isa = PBXGroup;
 			children = (
@@ -70,9 +145,11 @@
 			children = (
 				A21 /* Info.plist */,
 				A57 /* Assets.xcassets */,
+				A79 /* iPhoneInfo.xcdatamodeld */,
 				A26 /* App */,
 				A27 /* Models */,
 				A28 /* Services */,
+				A80 /* Benchmark */,
 				A29 /* Views */,
 			);
 			path = iPhoneInfo;
@@ -100,6 +177,7 @@
 			children = (
 				A48 /* ExtendedDeviceInfo.swift */,
 				A6 /* DeviceModels.swift */,
+				A71 /* CoreDataModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -111,7 +189,12 @@
 				A49 /* ExtendedDeviceDetailsService.swift */,
 				A54 /* ThermalService.swift */,
 				A55 /* PerformanceModeService.swift */,
-				A58 /* BenchmarkService.swift */,
+				A72 /* SensorService.swift */,
+				A73 /* SystemMonitor.swift */,
+				A74 /* BenchmarkCoordinator.swift */,
+				A91 /* GameExperienceService.swift */,
+				A94 /* NetworkLatencyService.swift */,
+				A96 /* GamerDashboardService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -120,6 +203,9 @@
 			isa = PBXGroup;
 			children = (
 				A10 /* HomeView.swift */,
+				A97 /* GamerHomeDashboardView.swift */,
+				A99 /* SustainedGamingTestView.swift */,
+				A110 /* HUD */,
 				A12 /* BenchmarkView.swift */,
 				A14 /* MonitorView.swift */,
 				A16 /* CompareView.swift */,
@@ -127,6 +213,17 @@
 				A56 /* DeviceDebugView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		A80 /* Benchmark */ = {
+			isa = PBXGroup;
+			children = (
+				A75 /* CPUBenchmark.swift */,
+				A78 /* MetalBenchmark.swift */,
+				A76 /* MemoryBenchmark.swift */,
+				A77 /* StorageBenchmark.swift */,
+			);
+			path = Benchmark;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -217,7 +314,34 @@
 				A60 /* ThermalService.swift in Sources */,
 				A61 /* PerformanceModeService.swift in Sources */,
 				A62 /* DeviceDebugView.swift in Sources */,
-				A63 /* BenchmarkService.swift in Sources */,
+				A81 /* CoreDataModels.swift in Sources */,
+				A82 /* SensorService.swift in Sources */,
+				A83 /* SystemMonitor.swift in Sources */,
+				A84 /* BenchmarkCoordinator.swift in Sources */,
+				A92 /* GameExperienceService.swift in Sources */,
+				A93 /* NetworkLatencyService.swift in Sources */,
+				A95 /* GamerDashboardService.swift in Sources */,
+				A98 /* GamerHomeDashboardView.swift in Sources */,
+				A100 /* SustainedGamingTestView.swift in Sources */,
+				A111 /* HUDTheme.swift in Sources */,
+				A112 /* HUDPanel.swift in Sources */,
+				A113 /* HUDScanlineOverlay.swift in Sources */,
+				A114 /* HUDGlitchText.swift in Sources */,
+				A115 /* HUDBg.swift in Sources */,
+				A116 /* HUDRingGauge.swift in Sources */,
+				A117 /* HUDMiniStat.swift in Sources */,
+				A118 /* HUDRow.swift in Sources */,
+				A119 /* HUDPulseBorder.swift in Sources */,
+				A123 /* HUDNoiseOverlay.swift in Sources */,
+				A124 /* HUDRadarSweep.swift in Sources */,
+				A125 /* HUDGridOverlay.swift in Sources */,
+				A131 /* ROGComponents.swift in Sources */,
+				A133 /* HUDCircuitOverlay.swift in Sources */,
+				A85 /* CPUBenchmark.swift in Sources */,
+				A88 /* MetalBenchmark.swift in Sources */,
+				A86 /* MemoryBenchmark.swift in Sources */,
+				A87 /* StorageBenchmark.swift in Sources */,
+				A90 /* iPhoneInfo.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -350,7 +474,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 8UJ769B75J;
+				DEVELOPMENT_TEAM = FS9MV278KY;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = iPhoneInfo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -362,7 +486,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.iphoneinfo.benchmark;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jiaojun.iphoneinfo.benchmark;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
@@ -382,7 +506,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 8UJ769B75J;
+				DEVELOPMENT_TEAM = FS9MV278KY;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = iPhoneInfo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -394,7 +518,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.iphoneinfo.benchmark;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jiaojun.iphoneinfo.benchmark;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;

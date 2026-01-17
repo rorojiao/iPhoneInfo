@@ -1,0 +1,11 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project iPhoneInfo.xcodeproj -scheme iPhoneInfo -configuration Debug build
+
+2026-01-13 10:21:10.110 xcodebuild[75331:941996] Error Domain=NSCocoaErrorDomain Code=3840 "JSON text did not start with array or object and option to allow fragments not set. around line 1, column 0." UserInfo={NSDebugDescription=JSON text did not start with array or object and option to allow fragments not set. around line 1, column 0., NSJSONSerializationErrorIndex=0}
+2026-01-13 10:21:10.112 xcodebuild[75331:941996] Writing error result bundle to /var/folders/qd/pwlhw41x3f70ht_g3fd1thsc0000gn/T/ResultBundle_2026-13-01_10-21-0010.xcresult
+xcodebuild: error: Unable to read project 'iPhoneInfo.xcodeproj'.
+	Reason: The project ‘iPhoneInfo’ is damaged and cannot be opened due to a parse error. Examine the project file for invalid edits or unresolved source control conflicts.
+
+Path: /Users/jiaojunze/Library/Mobile Documents/com~apple~CloudDocs/working_MAC/iphoneInfo/iPhoneInfo.xcodeproj
+
+

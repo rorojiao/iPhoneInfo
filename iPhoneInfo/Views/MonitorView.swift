@@ -2,228 +2,464 @@
 //  MonitorView.swift
 //  iPhoneInfo
 //
-//  Real-time system monitoring view
+//  Real-time system monitoring view - ROG HUD Style
 //
 
 import SwiftUI
 
 struct MonitorView: View {
-    @StateObject private var monitor = SystemMonitor()
+    @StateObject private var monitor = SystemMonitor.shared
+    @StateObject private var benchmarkCoordinator = BenchmarkCoordinator.shared
+    @StateObject private var gameExperienceService = GameExperienceService.shared
     @State private var selectedTab: MonitorTab = .all
 
     enum MonitorTab: String, CaseIterable {
         case all = "全部"
+        case game = "游戏"
         case cpu = "CPU"
         case memory = "内存"
         case gpu = "GPU"
         case battery = "电池"
+        case network = "网络"
     }
 
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Tab Picker
-                    Picker("Monitor Tab", selection: $selectedTab) {
-                        ForEach(MonitorTab.allCases, id: \.self) { tab in
-                            Text(tab.rawValue).tag(tab)
+        ZStack {
+            HUDBg()
+
+            VStack(spacing: 14) {
+                ROGMonitorHeader()
+
+                ROGTabPicker(selection: $selectedTab)
+
+                ScrollView {
+                    VStack(spacing: 16) {
+                        if let metrics = monitor.currentMetrics {
+                            switch selectedTab {
+                            case .all:
+                                ROGAllMonitorsView(metrics: metrics, gameAssessment: gameExperienceService.assessment)
+                            case .game:
+                                ROGGameMonitorCard(assessment: gameExperienceService.assessment)
+                            case .cpu:
+                                ROGCPUMonitorCard(cpuUsage: metrics.cpuUsage)
+                            case .memory:
+                                ROGMemoryMonitorCard(memoryUsage: metrics.memoryUsage)
+                            case .gpu:
+                                ROGGPUMonitorCard(gpuUsage: metrics.gpuUsage)
+                            case .battery:
+                                ROGBatteryMonitorCard(batteryLevel: Double(metrics.batteryLevel) * 100, temperature: thermalToCelsius(metrics.thermalState))
+                            case .network:
+                                ROGNetworkMonitorCard(wifiIP: metrics.wifiIP, cellularIP: metrics.cellularIP)
+                            }
+                        } else {
+                            ROGCard(title: nil, accent: HUDTheme.rogCyan) {
+                                HStack {
+                                    ProgressView()
+                                        .tint(HUDTheme.rogCyan)
+                                    Text("正在加载监控数据...")
+                                        .foregroundColor(HUDTheme.textSecondary)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 40)
+                            }
                         }
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal)
 
-                    // Monitor Cards
-                    switch selectedTab {
-                    case .all:
-                        AllMonitorsView(monitor: monitor)
-                    case .cpu:
-                        CPUMonitorCard(cpuUsage: monitor.cpuUsage)
-                    case .memory:
-                        MemoryMonitorCard(memoryUsage: monitor.memoryUsage)
-                    case .gpu:
-                        GPUMonitorCard(gpuUsage: monitor.gpuUsage)
-                    case .battery:
-                        BatteryMonitorCard(batteryLevel: monitor.batteryLevel, temperature: monitor.temperature)
+                        // Update interval info
+                        Text("刷新间隔: 1 秒")
+                            .font(.caption)
+                            .foregroundColor(HUDTheme.textSecondary)
+                            .padding(.bottom, 20)
                     }
-
-                    // Update Interval Info
-                    Text("刷新间隔: 1 秒")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    .padding(.horizontal, 16)
                 }
-                .padding(.vertical)
             }
-            .navigationTitle("实时监控")
-            .onAppear {
-                monitor.startMonitoring()
-            }
-            .onDisappear {
-                monitor.stopMonitoring()
-            }
+            .padding(.top, 10)
+        }
+        .onAppear {
+            monitor.startMonitoring()
+            gameExperienceService.update(metrics: monitor.currentMetrics, lastBenchmark: benchmarkCoordinator.currentResult)
+        }
+        .onDisappear {
+            monitor.stopMonitoring()
+        }
+        .onReceive(monitor.$currentMetrics) { metrics in
+            gameExperienceService.update(metrics: metrics, lastBenchmark: benchmarkCoordinator.currentResult)
+        }
+        .onReceive(benchmarkCoordinator.$currentResult) { result in
+            gameExperienceService.update(metrics: monitor.currentMetrics, lastBenchmark: result)
         }
     }
 }
 
-// MARK: - All Monitors View
-struct AllMonitorsView: View {
-    @ObservedObject var monitor: SystemMonitor
+// MARK: - ROG Monitor Header
+private struct ROGMonitorHeader: View {
+    var body: some View {
+        HStack {
+            Text("实时监控")
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(HUDTheme.textPrimary)
+
+            Spacer()
+
+            Image(systemName: "waveform.path.ecg")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(HUDTheme.rogCyan)
+                .padding(10)
+                .background(Color.black.opacity(0.45))
+                .cornerRadius(12)
+        }
+        .padding(.horizontal, 16)
+    }
+}
+
+// MARK: - ROG Tab Picker
+private struct ROGTabPicker: View {
+    @Binding var selection: MonitorView.MonitorTab
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(MonitorView.MonitorTab.allCases, id: \.self) { tab in
+                    Button(action: { selection = tab }) {
+                        Text(tab.rawValue)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(selection == tab ? HUDTheme.textPrimary : HUDTheme.textSecondary)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(selection == tab ? HUDTheme.rogRed : Color.black.opacity(0.55))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(selection == tab ? HUDTheme.borderStrong : HUDTheme.borderSoft, lineWidth: HUDTheme.borderWidth)
+                            )
+                            .cornerRadius(8)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+    }
+}
+
+// MARK: - ROG All Monitors View
+private struct ROGAllMonitorsView: View {
+    let metrics: SystemMetrics
+    let gameAssessment: GameExperienceAssessment
 
     var body: some View {
         VStack(spacing: 16) {
-            CPUMonitorCard(cpuUsage: monitor.cpuUsage)
-            MemoryMonitorCard(memoryUsage: monitor.memoryUsage)
-            GPUMonitorCard(gpuUsage: monitor.gpuUsage)
-            BatteryMonitorCard(batteryLevel: monitor.batteryLevel, temperature: monitor.temperature)
+            ROGGameMonitorCard(assessment: gameAssessment)
+            ROGCPUMonitorCard(cpuUsage: metrics.cpuUsage)
+            ROGMemoryMonitorCard(memoryUsage: metrics.memoryUsage)
+            ROGGPUMonitorCard(gpuUsage: metrics.gpuUsage)
+            ROGBatteryMonitorCard(batteryLevel: Double(metrics.batteryLevel) * 100, temperature: thermalToCelsius(metrics.thermalState))
+            ROGNetworkMonitorCard(wifiIP: metrics.wifiIP, cellularIP: metrics.cellularIP)
         }
-        .padding(.horizontal)
     }
 }
 
-// MARK: - CPU Monitor Card
+// MARK: - ROG Game Monitor Card
+private struct ROGGameMonitorCard: View {
+    let assessment: GameExperienceAssessment
+
+    var body: some View {
+        ROGCard(title: "游戏卡顿评估", accent: riskColor) {
+            VStack(alignment: .leading, spacing: 10) {
+                ROGMonitorRow(label: "风险", value: assessment.risk.rawValue, valueColor: riskColor)
+                ROGMonitorRow(label: "热状态", value: assessment.thermalState)
+                ROGMonitorRow(label: "低电量模式", value: assessment.lowPowerModeEnabled ? "开启" : "关闭")
+
+                if let drop = assessment.cpuDropPercent {
+                    ROGMonitorRow(label: "CPU 降速估计", value: "\(String(format: "%.1f", drop))%")
+                }
+
+                if !assessment.reasons.isEmpty {
+                    Text(assessment.reasons.joined(separator: " · "))
+                        .font(.caption)
+                        .foregroundColor(HUDTheme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                if !assessment.advice.isEmpty {
+                    Text(assessment.advice)
+                        .font(.caption)
+                        .foregroundColor(HUDTheme.rogCyan)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Divider().background(Color.white.opacity(0.1))
+
+                Text("说明：iOS 无法直接监控其他游戏的帧率/频率，本评估基于当前设备热状态与负载推断")
+                    .font(.caption2)
+                    .foregroundColor(HUDTheme.textSecondary.opacity(0.7))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private var riskColor: Color {
+        switch assessment.risk {
+        case .low: return HUDTheme.neonGreen
+        case .medium: return HUDTheme.neonOrange
+        case .high: return HUDTheme.rogRed
+        }
+    }
+}
+
+// MARK: - ROG CPU Monitor Card
+private struct ROGCPUMonitorCard: View {
+    let cpuUsage: Double
+
+    var body: some View {
+        ROGCard(title: "CPU 使用率", accent: HUDTheme.rogCyan) {
+            HStack {
+                Spacer()
+                ROGCircularGauge(value: cpuUsage, maxValue: 100, color: HUDTheme.rogCyan, label: "CPU")
+                Spacer()
+            }
+        }
+    }
+}
+
+// MARK: - ROG Memory Monitor Card
+private struct ROGMemoryMonitorCard: View {
+    let memoryUsage: Double
+
+    var body: some View {
+        ROGCard(title: "内存使用率", accent: Color.purple) {
+            HStack {
+                Spacer()
+                ROGCircularGauge(value: memoryUsage, maxValue: 100, color: Color.purple, label: "内存")
+                Spacer()
+            }
+        }
+    }
+}
+
+// MARK: - ROG GPU Monitor Card
+private struct ROGGPUMonitorCard: View {
+    let gpuUsage: Double
+
+    var body: some View {
+        ROGCard(title: "GPU 使用率", accent: HUDTheme.neonGreen) {
+            HStack {
+                Spacer()
+                ROGCircularGauge(value: gpuUsage, maxValue: 100, color: HUDTheme.neonGreen, label: "GPU")
+                Spacer()
+            }
+        }
+    }
+}
+
+// MARK: - ROG Battery Monitor Card
+private struct ROGBatteryMonitorCard: View {
+    let batteryLevel: Double
+    let temperature: Double
+
+    var body: some View {
+        ROGCard(title: "电池状态", accent: HUDTheme.neonOrange) {
+            HStack(spacing: 40) {
+                Spacer()
+
+                VStack(spacing: 8) {
+                    Image(systemName: "battery.100percent")
+                        .font(.system(size: 32))
+                        .foregroundColor(batteryColor)
+                    Text("\(Int(batteryLevel))%")
+                        .font(.system(size: 28, weight: .bold, design: .monospaced))
+                        .foregroundColor(HUDTheme.textPrimary)
+                    Text("电量")
+                        .font(.caption)
+                        .foregroundColor(HUDTheme.textSecondary)
+                }
+
+                VStack(spacing: 8) {
+                    Image(systemName: "thermometer")
+                        .font(.system(size: 32))
+                        .foregroundColor(temperatureColor)
+                    Text(String(format: "%.0f°C", temperature))
+                        .font(.system(size: 28, weight: .bold, design: .monospaced))
+                        .foregroundColor(HUDTheme.textPrimary)
+                    Text("温度")
+                        .font(.caption)
+                        .foregroundColor(HUDTheme.textSecondary)
+                }
+
+                Spacer()
+            }
+            .padding(.vertical, 10)
+        }
+    }
+
+    private var batteryColor: Color {
+        if batteryLevel > 50 { return HUDTheme.neonGreen }
+        if batteryLevel > 20 { return HUDTheme.neonOrange }
+        return HUDTheme.rogRed
+    }
+
+    private var temperatureColor: Color {
+        if temperature < 40 { return HUDTheme.neonGreen }
+        if temperature < 45 { return HUDTheme.neonOrange }
+        return HUDTheme.rogRed
+    }
+}
+
+// MARK: - ROG Network Monitor Card
+private struct ROGNetworkMonitorCard: View {
+    let wifiIP: String?
+    let cellularIP: String?
+
+    var body: some View {
+        ROGCard(title: "网络", accent: HUDTheme.rogCyan) {
+            VStack(alignment: .leading, spacing: 12) {
+                ROGMonitorRow(label: "WiFi IP", value: wifiIP ?? "未连接")
+                ROGMonitorRow(label: "蜂窝 IP", value: cellularIP ?? "未连接")
+
+                Divider().background(Color.white.opacity(0.1))
+
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(HUDTheme.neonOrange)
+                        .font(.caption)
+                    Text("网络流量监控在 iOS 上不可用")
+                        .font(.caption)
+                        .foregroundColor(HUDTheme.neonOrange)
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("• iOS App Store 隐私限制不允许应用读取系统网络流量统计")
+                        .font(.caption2)
+                        .foregroundColor(HUDTheme.textSecondary.opacity(0.7))
+                    Text("• 私有 API 存在取整/溢出问题，数据不可靠")
+                        .font(.caption2)
+                        .foregroundColor(HUDTheme.textSecondary.opacity(0.7))
+                }
+            }
+        }
+    }
+}
+
+// MARK: - ROG Circular Gauge
+private struct ROGCircularGauge: View {
+    let value: Double
+    let maxValue: Double
+    let color: Color
+    let label: String
+
+    var body: some View {
+        VStack(spacing: 8) {
+            ZStack {
+                Circle()
+                    .stroke(Color.white.opacity(0.1), lineWidth: 10)
+                    .frame(width: 120, height: 120)
+
+                Circle()
+                    .trim(from: 0, to: min(value / maxValue, 1.0))
+                    .stroke(color, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+                    .frame(width: 120, height: 120)
+                    .rotationEffect(.degrees(-90))
+                    .shadow(color: color.opacity(0.5), radius: 8, x: 0, y: 0)
+                    .animation(.spring(response: 0.5), value: value)
+
+                VStack(spacing: 2) {
+                    Text("\(Int(value))%")
+                        .font(.system(size: 28, weight: .bold, design: .monospaced))
+                        .foregroundColor(HUDTheme.textPrimary)
+                    Text(label)
+                        .font(.caption)
+                        .foregroundColor(HUDTheme.textSecondary)
+                }
+            }
+        }
+        .padding(.vertical, 10)
+    }
+}
+
+// MARK: - ROG Monitor Row
+private struct ROGMonitorRow: View {
+    let label: String
+    let value: String
+    var valueColor: Color = HUDTheme.textPrimary
+
+    var body: some View {
+        HStack {
+            Text(label)
+                .foregroundColor(HUDTheme.textSecondary)
+            Spacer()
+            Text(value)
+                .font(.system(.subheadline, design: .monospaced))
+                .foregroundColor(valueColor)
+        }
+    }
+}
+
+// MARK: - Helper
+private func thermalToCelsius(_ state: ThermalState) -> Double {
+    switch state {
+    case .normal:
+        return 35.0
+    case .light:
+        return 38.0
+    case .moderate:
+        return 42.0
+    case .heavy:
+        return 48.0
+    case .critical:
+        return 55.0
+    }
+}
+
+// MARK: - Legacy Components (kept for compatibility)
+struct GameMonitorCard: View {
+    let assessment: GameExperienceAssessment
+
+    var body: some View {
+        ROGGameMonitorCard(assessment: assessment)
+    }
+}
+
+struct AllMonitorsView: View {
+    let metrics: SystemMetrics
+    let gameAssessment: GameExperienceAssessment
+
+    var body: some View {
+        ROGAllMonitorsView(metrics: metrics, gameAssessment: gameAssessment)
+    }
+}
+
 struct CPUMonitorCard: View {
     let cpuUsage: Double
 
     var body: some View {
-        MonitorCard(icon: "cpu", title: "CPU 使用率", color: .blue) {
-            VStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .stroke(Color(.systemGray5), lineWidth: 12)
-                        .frame(width: 120, height: 120)
-
-                    Circle()
-                        .trim(from: 0, to: cpuUsage / 100.0)
-                        .stroke(Color.blue, style: StrokeStyle(lineWidth: 12, lineCap: .round))
-                        .frame(width: 120, height: 120)
-                        .rotationEffect(.degrees(-90))
-                        .animation(.spring(), value: cpuUsage)
-
-                    Text("\(Int(cpuUsage))%")
-                        .font(.title)
-                        .fontWeight(.bold)
-                }
-
-                MiniChart(data: generateDummyData())
-                    .frame(height: 40)
-            }
-        }
-    }
-
-    private func generateDummyData() -> [Double] {
-        (0..<20).map { _ in Double.random(in: 20...80) }
+        ROGCPUMonitorCard(cpuUsage: cpuUsage)
     }
 }
 
-// MARK: - Memory Monitor Card
 struct MemoryMonitorCard: View {
     let memoryUsage: Double
 
     var body: some View {
-        MonitorCard(icon: "memorychip", title: "内存使用率", color: .purple) {
-            VStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .stroke(Color(.systemGray5), lineWidth: 12)
-                        .frame(width: 120, height: 120)
-
-                    Circle()
-                        .trim(from: 0, to: memoryUsage / 100.0)
-                        .stroke(Color.purple, style: StrokeStyle(lineWidth: 12, lineCap: .round))
-                        .frame(width: 120, height: 120)
-                        .rotationEffect(.degrees(-90))
-                        .animation(.spring(), value: memoryUsage)
-
-                    Text("\(Int(memoryUsage))%")
-                        .font(.title)
-                        .fontWeight(.bold)
-                }
-
-                MiniChart(data: generateDummyData())
-                    .frame(height: 40)
-            }
-        }
-    }
-
-    private func generateDummyData() -> [Double] {
-        (0..<20).map { _ in Double.random(in: 40...70) }
+        ROGMemoryMonitorCard(memoryUsage: memoryUsage)
     }
 }
 
-// MARK: - GPU Monitor Card
 struct GPUMonitorCard: View {
     let gpuUsage: Double
 
     var body: some View {
-        MonitorCard(icon: "cube", title: "GPU 使用率", color: .green) {
-            VStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .stroke(Color(.systemGray5), lineWidth: 12)
-                        .frame(width: 120, height: 120)
-
-                    Circle()
-                        .trim(from: 0, to: gpuUsage / 100.0)
-                        .stroke(Color.green, style: StrokeStyle(lineWidth: 12, lineCap: .round))
-                        .frame(width: 120, height: 120)
-                        .rotationEffect(.degrees(-90))
-                        .animation(.spring(), value: gpuUsage)
-
-                    Text("\(Int(gpuUsage))%")
-                        .font(.title)
-                        .fontWeight(.bold)
-                }
-
-                MiniChart(data: generateDummyData())
-                    .frame(height: 40)
-            }
-        }
-    }
-
-    private func generateDummyData() -> [Double] {
-        (0..<20).map { _ in Double.random(in: 10...50) }
+        ROGGPUMonitorCard(gpuUsage: gpuUsage)
     }
 }
 
-// MARK: - Battery Monitor Card
 struct BatteryMonitorCard: View {
     let batteryLevel: Double
     let temperature: Double
 
     var body: some View {
-        MonitorCard(icon: "battery.100percent", title: "电池状态", color: .orange) {
-            VStack(spacing: 12) {
-                HStack(spacing: 30) {
-                    VStack(spacing: 4) {
-                        Text("\(Int(batteryLevel))%")
-                            .font(.title)
-                            .fontWeight(.bold)
-                        Text("电量")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-
-                    VStack(spacing: 4) {
-                        Text(String(format: "%.0f°C", temperature))
-                            .font(.title)
-                            .fontWeight(.bold)
-                        Text("温度")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                MiniChart(data: generateDummyData())
-                    .frame(height: 40)
-            }
-        }
-    }
-
-    private func generateDummyData() -> [Double] {
-        (0..<20).map { _ in Double.random(in: 30...40) }
+        ROGBatteryMonitorCard(batteryLevel: batteryLevel, temperature: temperature)
     }
 }
 
-// MARK: - Monitor Card
 struct MonitorCard<Content: View>: View {
     let icon: String
     let title: String
@@ -238,24 +474,12 @@ struct MonitorCard<Content: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Image(systemName: icon)
-                    .foregroundColor(color)
-                Text(title)
-                    .font(.headline)
-                Spacer()
-            }
-
+        ROGCard(title: title, accent: color) {
             content
         }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
     }
 }
 
-// MARK: - Mini Chart
 struct MiniChart: View {
     let data: [Double]
 
@@ -266,7 +490,6 @@ struct MiniChart: View {
             let range = max - min
 
             ZStack {
-                // Chart line
                 Path { path in
                     let width = geometry.size.width
                     let height = geometry.size.height
@@ -282,40 +505,18 @@ struct MiniChart: View {
                         x += step
                     }
                 }
-                .stroke(Color.blue, style: StrokeStyle(lineWidth: 2, lineJoin: .round))
+                .stroke(HUDTheme.rogCyan, style: StrokeStyle(lineWidth: 2, lineJoin: .round))
             }
         }
     }
 }
 
-// MARK: - System Monitor
-class SystemMonitor: ObservableObject {
-    @Published var cpuUsage: Double = 0
-    @Published var memoryUsage: Double = 0
-    @Published var gpuUsage: Double = 0
-    @Published var batteryLevel: Double = 82
-    @Published var temperature: Double = 36
+struct NetworkMonitorCard: View {
+    let wifiIP: String?
+    let cellularIP: String?
 
-    private var timer: Timer?
-
-    func startMonitoring() {
-        updateMetrics()
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            self.updateMetrics()
-        }
-    }
-
-    func stopMonitoring() {
-        timer?.invalidate()
-        timer = nil
-    }
-
-    private func updateMetrics() {
-        // Simulate real-time data
-        cpuUsage = Double.random(in: 20...60)
-        memoryUsage = Double.random(in: 50...70)
-        gpuUsage = Double.random(in: 10...40)
-        batteryLevel = max(0, batteryLevel - Double.random(in: 0...0.1))
+    var body: some View {
+        ROGNetworkMonitorCard(wifiIP: wifiIP, cellularIP: cellularIP)
     }
 }
 

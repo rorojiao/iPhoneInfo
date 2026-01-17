@@ -10,6 +10,25 @@ This is an **iPhone Info & Benchmark Tool** - a comprehensive iOS application th
 
 **Key Differentiator**: Integration of system information viewing + Metal-based 3D benchmarking + real-time monitoring in a single app, fully localized for Chinese users.
 
+## Agent / Opencode Rules
+
+- 对话语言：始终使用中文。
+- 用户可见文案：使用中文（与现有 UI 保持一致）。
+- 代码/脚本注释：使用英文（English comments only）。
+- 避免乱码：新增脚本/生成文件统一使用 UTF-8；避免在脚本中输出不可控的非 ASCII 字符。
+- 调试日志：允许英文（建议统一前缀如 `[DEBUG]`）。
+
+### Script Encoding Template
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# English comments only
+```
+
 ## Product Requirements Document
 
 The complete product specification is documented in `PRD_iPhone_Info_Benchmark.md`. This includes:

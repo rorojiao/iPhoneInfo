@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version:5.9
 import PackageDescription
 
 let package = Package(
@@ -7,14 +7,24 @@ let package = Package(
         .iOS(.v15)
     ],
     products: [
-        .library(name: "iPhoneInfo", targets: ["iPhoneInfo"])
+        .library(
+            name: "iPhoneInfo",
+            targets: ["iPhoneInfo"]
+        )
     ],
     dependencies: [],
     targets: [
         .target(
             name: "iPhoneInfo",
             dependencies: [],
-            path: "iPhoneInfo"
+            path: "iPhoneInfo",
+            sources: [
+                "App",
+                "Views",
+                "Services",
+                "Models",
+                "Benchmark"
+            ]
         )
     ]
 )

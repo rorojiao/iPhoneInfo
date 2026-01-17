@@ -66,22 +66,21 @@ class CPUBenchmark {
 
     // MARK: - Multi Core Test
     func runMultiCoreTest() -> Int {
-        let processorCount = max(1, ProcessInfo.processInfo.processorCount)
+        let processorCount = ProcessInfo.processInfo.processorCount
         let operationsPerCore = 5_000_000
         let startTime = Date()
 
         let group = DispatchGroup()
         var scores: [Int] = []
-        let lock = NSLock()
 
         for _ in 0..<processorCount {
             group.enter()
             DispatchQueue.global(qos: .userInitiated).async {
                 let score = self.runSingleCoreTestLimited(operationsPerCore)
-                lock.lock()
-                scores.append(score)
-                lock.unlock()
-                group.leave()
+                DispatchQueue.main.async {
+                    scores.append(score)
+                    group.leave()
+                }
             }
         }
 
@@ -124,7 +123,7 @@ class CPUBenchmark {
             result /= 3
 
             // Hash calculation
-result = result.hashValue
+            result = Int(bitPattern: UInt32(result).hashValue)
         }
 
         let elapsed = Date().timeIntervalSince(startTime)
@@ -171,8 +170,7 @@ result = result.hashValue
             // Simple hash simulation
             var hash: UInt32 = 0
             for byte in data {
-                let byteVal = UInt32(byte)
-hash = hash * 31 + byteVal
+                hash = hash &* 31 &+ byte
             }
 
             totalBytes += data.count
@@ -225,26 +223,6 @@ hash = hash * 31 + byteVal
             cryptoScore: totalScore,
             totalScore: totalScore
         )
-    }
-
-    func runThrottlingProbe(operations: Int = 1_000_000) -> Double {
-        let startTime = Date()
-        var count = 0
-        var primeCount = 0
-
-        for _ in 0..<operations {
-            if isPrime(count) {
-                primeCount += 1
-            }
-            count += 1
-        }
-
-        if primeCount == 0 {
-            _ = primeCount
-        }
-
-        let elapsed = Date().timeIntervalSince(startTime)
-        return elapsed > 0 ? (Double(operations) / elapsed) : 0
     }
 
     // MARK: - Helper Functions
