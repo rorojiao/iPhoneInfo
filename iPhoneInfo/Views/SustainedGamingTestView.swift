@@ -78,8 +78,8 @@ struct SustainedGamingTestView: View {
             .padding(.top, 12)
             .padding(.bottom, 20)
         }
-        .overlay(HUDScanlineOverlay(opacity: 0.05).ignoresSafeArea())
-        .interactiveDismissDisabled(true)
+        .overlay(HUDScanlineOverlay(opacity: 0.05).ignoresSafeArea().allowsHitTesting(false))
+        .interactiveDismissDisabled(benchmarkCoordinator.isSustainedRunning)
         .onAppear {
             dashboard.startGamerMonitoring()
             if !benchmarkCoordinator.isSustainedRunning && benchmarkCoordinator.sustainedResult == nil {

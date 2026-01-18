@@ -238,7 +238,7 @@ class SystemMonitor: ObservableObject {
         var gpuLoad: Double = 0
 
         // Check if screen is on
-        if UIScreen.main.brightness > 0 {
+        if getCurrentScreen().brightness > 0 {
             gpuLoad += 20  // Base load for display
         }
 

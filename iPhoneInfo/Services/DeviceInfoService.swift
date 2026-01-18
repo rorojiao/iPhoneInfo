@@ -8,6 +8,17 @@
 import Foundation
 import UIKit
 
+// MARK: - iOS 26+ 兼容的 UIScreen 访问
+// UIScreen.main 在 iOS 26 中已废弃，使用此辅助函数获取当前屏幕
+func getCurrentScreen() -> UIScreen {
+    // iOS 26+ 推荐通过 connected scenes 获取屏幕
+    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+        return windowScene.screen
+    }
+    // 回退到 main（兼容旧版本）
+    return UIScreen.main
+}
+
 class DeviceInfoService: ObservableObject {
     static let shared = DeviceInfoService()
 
@@ -49,15 +60,16 @@ class DeviceInfoService: ObservableObject {
         let deviceType = mapModelToDeviceName(rawModel)
         print("[DEBUG] Mapped device type: \(deviceType)")
 
+        let screen = getCurrentScreen()
         let info = DeviceInfo(
             name: device.name,
             model: rawModel,
             systemVersion: device.systemVersion,
             buildNumber: getBuildNumber(),
             deviceType: deviceType,
-            screenWidth: Int(UIScreen.main.bounds.width),
-            screenHeight: Int(UIScreen.main.bounds.height),
-            scale: Int(UIScreen.main.scale)
+            screenWidth: Int(screen.bounds.width),
+            screenHeight: Int(screen.bounds.height),
+            scale: Int(screen.scale)
         )
 
         DispatchQueue.main.async {
@@ -364,94 +376,30 @@ class DeviceInfoService: ObservableObject {
         }
     }
 
-    // MARK: - Advanced Battery Info (IOKit based)
+    // MARK: - Advanced Battery Info
+    // NOTE: iOS 沙盒限制了对电池详细信息的访问
+    // 电池健康度和循环次数无法通过公开 API 获取
+    // 只有电量 (batteryLevel) 和充电状态 (batteryState) 是真实可获取的
     private func getAdvancedBatteryInfo() -> (health: Int?, cycleCount: Int?, temperature: Double?) {
-        // Note: On iOS, IOKit access is restricted in sandbox
-        // We'll try to estimate based on available data or use cached values
-
-        var health: Int? = nil
-        var cycleCount: Int? = nil
-        var temperature: Double? = nil
-
-        // Method 1: Try IOKit (may not work in sandbox)
-        if let batteryData = getBatteryDataFromIOKit() {
-            health = batteryData.health
-            cycleCount = batteryData.cycleCount
-            temperature = batteryData.temperature
-        }
-
-        // Method 2: Estimate based on device age if IOKit fails
-        if health == nil {
-            health = estimateBatteryHealth()
-        }
-
-        if cycleCount == nil {
-            cycleCount = estimateCycleCount()
-        }
-
-        // Method 3: Use thermal state as temperature proxy
-        if temperature == nil {
-            temperature = ThermalService.shared.currentTemperature
-        }
-
-        return (health, cycleCount, temperature)
-    }
-
-    private func getBatteryDataFromIOKit() -> (health: Int?, cycleCount: Int?, temperature: Double?)? {
-        // IOKit battery access - this may be blocked in iOS sandbox
-        // but we try anyway for devices that allow it
-
+        // iOS App Store 应用无法获取以下信息:
+        // - 电池健康度 (需要 IOKit 私有 API)
+        // - 充电循环次数 (需要 IOKit 私有 API)
+        // - 电池温度 (需要 IOKit 私有 API)
+        //
+        // 这些数据只能通过以下方式获取:
+        // 1. 系统设置 > 电池 > 电池健康
+        // 2. 导出系统诊断日志并解析
+        // 3. 使用私有 API (会导致 App Store 审核被拒)
+        
         #if targetEnvironment(simulator)
-        // Simulator fallback values
+        // 模拟器使用示例值
         return (health: 100, cycleCount: 0, temperature: 25.0)
         #else
-        // On real device, IOKit access is typically blocked
-        // Return nil to use estimation methods
-        return nil
+        // 真机上返回 nil，UI 会显示"需在系统设置查看"
+        // 温度使用 ThermalService 的估算值（基于热状态）
+        let temperature = ThermalService.shared.currentTemperature
+        return (nil, nil, temperature)
         #endif
-    }
-
-    private func estimateBatteryHealth() -> Int {
-        // Estimate battery health based on device model and age
-        // This is an approximation - real health requires IOKit access
-
-        let model = getDeviceModel()
-
-        // Newer devices typically have better battery health
-        if model.hasPrefix("iPhone17,") { // iPhone 16 series
-            return Int.random(in: 98...100)
-        } else if model.hasPrefix("iPhone16,") { // iPhone 15 series
-            return Int.random(in: 95...100)
-        } else if model.hasPrefix("iPhone15,") { // iPhone 14 series
-            return Int.random(in: 90...98)
-        } else if model.hasPrefix("iPhone14,") { // iPhone 13 series
-            return Int.random(in: 85...95)
-        } else if model.hasPrefix("iPhone13,") { // iPhone 12 series
-            return Int.random(in: 80...92)
-        }
-
-        return Int.random(in: 75...90)
-    }
-
-    private func estimateCycleCount() -> Int {
-        // Estimate cycle count based on device model
-        // Newer devices = fewer cycles (rough estimate)
-
-        let model = getDeviceModel()
-
-        if model.hasPrefix("iPhone17,") { // iPhone 16 series (2024)
-            return Int.random(in: 50...200)
-        } else if model.hasPrefix("iPhone16,") { // iPhone 15 series (2023)
-            return Int.random(in: 150...400)
-        } else if model.hasPrefix("iPhone15,") { // iPhone 14 series (2022)
-            return Int.random(in: 300...600)
-        } else if model.hasPrefix("iPhone14,") { // iPhone 13 series (2021)
-            return Int.random(in: 450...800)
-        } else if model.hasPrefix("iPhone13,") { // iPhone 12 series (2020)
-            return Int.random(in: 600...1000)
-        }
-
-        return Int.random(in: 500...900)
     }
 
     // MARK: - Refresh Battery Info (public method for real-time updates)
@@ -461,7 +409,7 @@ class DeviceInfoService: ObservableObject {
 
     // MARK: - Display Information
     private func loadDisplayInfo() {
-        let screen = UIScreen.main
+        let screen = getCurrentScreen()
         let bounds = screen.bounds
         let scale = screen.scale
 

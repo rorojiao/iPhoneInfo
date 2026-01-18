@@ -21,5 +21,6 @@ struct HUDBg: View {
             HUDNoiseOverlay(opacity: 0.045)
                 .ignoresSafeArea()
         }
+        .allowsHitTesting(false) // 确保背景不阻止触摸事件
     }
 }

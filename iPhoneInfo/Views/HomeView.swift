@@ -263,8 +263,8 @@ private struct ROGStatsGrid: View {
             ROGStatCard(
                 icon: "arrow.triangle.2.circlepath",
                 title: "CYCLES",
-                value: "\(batteryInfo?.cycleCount ?? 0)",
-                subtitle: "充电循环",
+                value: batteryInfo?.cycleCount.map { "\($0)" } ?? "—",
+                subtitle: batteryInfo?.cycleCount == nil ? "需在系统查看" : "充电循环",
                 accentColor: HUDTheme.neonGreen,
                 chartData: nil
             )
@@ -570,8 +570,8 @@ private struct ROGDeviceInfoSection: View {
                     ROGInfoRow(icon: "cpu", label: "芯片", value: hardwareInfo?.cpuModel ?? "Unknown")
                     ROGInfoRow(icon: "memorychip", label: "内存", value: String(format: "%.0f GB", hardwareInfo?.totalMemoryGB ?? 0))
                     ROGInfoRow(icon: "internaldrive", label: "存储", value: String(format: "%.0f GB", hardwareInfo?.totalStorageGB ?? 0))
-                    ROGInfoRow(icon: "battery.100percent", label: "电池健康", value: batteryInfo?.health.map { "\($0)%" } ?? "未知")
-                    ROGInfoRow(icon: "arrow.triangle.2.circlepath", label: "循环次数", value: batteryInfo?.cycleCount.map { "\($0) 次" } ?? "未知")
+                    ROGInfoRow(icon: "battery.100percent", label: "电池健康", value: batteryInfo?.health.map { "\($0)%" } ?? "系统设置查看")
+                    ROGInfoRow(icon: "arrow.triangle.2.circlepath", label: "循环次数", value: batteryInfo?.cycleCount.map { "\($0) 次" } ?? "系统设置查看")
                     ROGInfoRow(icon: "thermometer", label: "电池温度", value: batteryInfo?.temperature.map { String(format: "%.1f°C", $0) } ?? "未知")
                 }
                 .padding(.horizontal, 14)

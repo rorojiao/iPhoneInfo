@@ -20,13 +20,23 @@
 ## ROG HUD Design System
 - Theme: `iPhoneInfo/Views/HUD/HUDTheme.swift`
 - Components: `iPhoneInfo/Views/HUD/ROGComponents.swift`
+- Background: `iPhoneInfo/Views/HUD/HUDBg.swift` (已设置 allowsHitTesting(false))
 
-## Recent Changes (2026-01-17)
-- HomeView unified: Merged player/device modes into single compact view
-- Fixed one-tap optimize: Now shows real advice via sheet
-- Optimized space: removed logo panel, compact cards
-- All major views rebuilt with ROG HUD styling
+## Recent Changes (2026-01-19)
+- 修复稳定性测试页面交互问题：HUDBg 添加 allowsHitTesting(false)
+- 电池数据真实化：移除虚假估算值，循环次数/健康度显示"系统设置查看"
+- BenchmarkView 风格统一：系统颜色替换为 ROG 主题色
+- iOS 26 适配：UIScreen.main 替换为 getCurrentScreen() 辅助函数
+- 所有界面风格统一
 
-## iOS Limitations
-- Cannot actually optimize system; can only provide advice
-- GamerHomeDashboardView.swift no longer used
+## iOS API 限制
+- 电池循环次数：无公开 API，需在系统设置 > 电池 > 电池健康查看
+- 电池健康度：无公开 API，使用 IOKit 会被 App Store 拒绝
+- 系统优化：只能提供建议，无法实际执行
+- GPU 使用率：无公开 API，使用估算值
+- 网络流量：沙盒限制，无法读取准确数据
+
+## 辅助函数
+- `getCurrentScreen()` in DeviceInfoService.swift: iOS 26 兼容的 UIScreen 访问
+
+## GamerHomeDashboardView.swift 已废弃

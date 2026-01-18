@@ -240,16 +240,17 @@ struct OverallScoreCard: View {
                 Circle()
                     .fill(gradeColor(for: result.overallGrade).opacity(0.2))
                     .frame(width: 120, height: 120)
+                    .shadow(color: gradeColor(for: result.overallGrade).opacity(0.5), radius: 12, x: 0, y: 0)
 
                 VStack(spacing: 4) {
                     Text("\(result.overallScore)")
-                        .font(.system(size: 42, weight: .bold, design: .rounded))
+                        .font(.system(size: 42, weight: .bold, design: .monospaced))
                         .foregroundColor(gradeColor(for: result.overallGrade))
 
                     Text(result.overallGrade)
                         .font(.title)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(HUDTheme.textPrimary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background(gradeColor(for: result.overallGrade))
@@ -260,21 +261,25 @@ struct OverallScoreCard: View {
             // Test Duration
             Text("测试耗时: \(String(format: "%.1f", result.testDuration)) 秒")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(HUDTheme.textSecondary)
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .background(Color(.systemBackground))
+        .background(Color.black.opacity(0.55))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(gradeColor(for: result.overallGrade).opacity(0.5), lineWidth: HUDTheme.borderWidth)
+        )
         .cornerRadius(12)
     }
 
     private func gradeColor(for grade: String) -> Color {
         switch grade {
         case "S": return .purple
-        case "A": return .green
-        case "B": return .blue
-        case "C": return .orange
-        default: return .gray
+        case "A": return HUDTheme.neonGreen
+        case "B": return HUDTheme.rogCyan
+        case "C": return HUDTheme.neonOrange
+        default: return HUDTheme.textSecondary
         }
     }
 }
@@ -290,6 +295,7 @@ struct PerformanceLevelCard: View {
             HStack {
                 Text("性能水平")
                     .font(.headline)
+                    .foregroundColor(HUDTheme.textPrimary)
 
                 Spacer()
 
@@ -299,27 +305,31 @@ struct PerformanceLevelCard: View {
                     .foregroundColor(gradeColor(for: grade))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(gradeColor(for: grade).opacity(0.1))
+                    .background(gradeColor(for: grade).opacity(0.15))
                     .cornerRadius(8)
             }
 
             Text(level.detailedDescription)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(HUDTheme.textSecondary)
                 .multilineTextAlignment(.leading)
         }
         .padding()
-        .background(Color.black.opacity(0.5))
+        .background(Color.black.opacity(0.55))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(HUDTheme.borderSoft, lineWidth: HUDTheme.borderWidth)
+        )
         .cornerRadius(12)
     }
 
     private func gradeColor(for grade: String) -> Color {
         switch grade {
         case "S": return .purple
-        case "A": return .green
-        case "B": return .blue
-        case "C": return .orange
-        default: return .gray
+        case "A": return HUDTheme.neonGreen
+        case "B": return HUDTheme.rogCyan
+        case "C": return HUDTheme.neonOrange
+        default: return HUDTheme.textSecondary
         }
     }
 }
@@ -334,16 +344,17 @@ struct TestScoreRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.blue)
+                .foregroundColor(HUDTheme.rogCyan)
                 .frame(width: 30)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(name)
                     .font(.subheadline)
+                    .foregroundColor(HUDTheme.textPrimary)
 
                 HStack(spacing: 4) {
                     Text("得分: \(score)")
-                        .font(.headline)
+                        .font(.system(.headline, design: .monospaced))
                         .foregroundColor(gradeColor(for: grade))
 
                     Text("等级: \(grade)")
@@ -351,7 +362,7 @@ struct TestScoreRow: View {
                         .padding(.horizontal, 8)
                         .padding(.vertical, 2)
                         .background(gradeColor(for: grade))
-                        .foregroundColor(.white)
+                        .foregroundColor(HUDTheme.textPrimary)
                         .cornerRadius(4)
                 }
             }
@@ -364,10 +375,10 @@ struct TestScoreRow: View {
     private func gradeColor(for grade: String) -> Color {
         switch grade {
         case "S": return .purple
-        case "A": return .green
-        case "B": return .blue
-        case "C": return .orange
-        default: return .gray
+        case "A": return HUDTheme.neonGreen
+        case "B": return HUDTheme.rogCyan
+        case "C": return HUDTheme.neonOrange
+        default: return HUDTheme.textSecondary
         }
     }
 }
@@ -378,26 +389,44 @@ struct DetailedReportView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text(result.description)
-                        .font(.system(.body, design: .monospaced))
-                        .padding()
-                        .background(Color.black.opacity(0.5))
-                        .cornerRadius(8)
-                }
-                .padding()
-            }
-            .navigationTitle("详细报告")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("关闭") {
-                        dismiss()
+        ZStack {
+            HUDBg()
+
+            VStack(spacing: 14) {
+                // Header
+                HStack {
+                    Button(action: { dismiss() }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .semibold))
+                            Text("返回")
+                                .font(.system(size: 16))
+                        }
+                        .foregroundColor(HUDTheme.rogCyan)
                     }
+
+                    Spacer()
+
+                    Text("详细报告")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(HUDTheme.textPrimary)
+
+                    Spacer()
+
+                    Color.clear.frame(width: 60)
+                }
+                .padding(.horizontal, 16)
+
+                ScrollView {
+                    ROGCard(title: "性能报告", accent: HUDTheme.rogCyan) {
+                        Text(result.description)
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundColor(HUDTheme.textSecondary)
+                    }
+                    .padding(.horizontal, 16)
                 }
             }
+            .padding(.top, 10)
         }
     }
 }
@@ -411,21 +440,22 @@ struct TestItemRow: View {
     var body: some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(.blue)
+                .foregroundColor(HUDTheme.rogCyan)
                 .frame(width: 30)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(name)
                     .font(.subheadline)
+                    .foregroundColor(HUDTheme.textPrimary)
                 Text(duration)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(HUDTheme.textSecondary)
             }
 
             Spacer()
 
             Image(systemName: "clock")
-                .foregroundColor(.secondary)
+                .foregroundColor(HUDTheme.textSecondary)
                 .font(.caption)
         }
         .padding()
@@ -442,12 +472,13 @@ struct StatusItem: View {
         VStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundColor(.blue)
+                .foregroundColor(HUDTheme.rogCyan)
             Text(label)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(HUDTheme.textSecondary)
             Text(value)
-                .font(.headline)
+                .font(.system(.headline, design: .monospaced))
+                .foregroundColor(HUDTheme.textPrimary)
         }
     }
 }
@@ -458,11 +489,11 @@ struct InfoBullet: View {
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
             Image(systemName: "info.circle.fill")
-                .foregroundColor(.blue)
+                .foregroundColor(HUDTheme.rogCyan)
                 .font(.caption)
             Text(text)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(HUDTheme.textSecondary)
         }
     }
 }

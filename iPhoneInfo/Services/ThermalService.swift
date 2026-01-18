@@ -151,7 +151,7 @@ class ThermalService: ObservableObject {
         }
 
         // 3. 屏幕亮度 (降低影响)
-        let brightness = UIScreen.main.brightness
+        let brightness = getCurrentScreen().brightness
         factors.append(Double(brightness) * 1.5) // 最大亮度可能增加1.5°C
 
         // 4. 设备使用时长（估算）- 移除，影响太小
