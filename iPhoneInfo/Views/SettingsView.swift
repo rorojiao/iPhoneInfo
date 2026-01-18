@@ -151,7 +151,7 @@ private struct ROGSettingsHeader: View {
     }
 }
 
-// MARK: - ROG Settings Section
+// MARK: - ROG Settings Section (Design mockup style with labeled header)
 private struct ROGSettingsSection<Content: View>: View {
     let title: String
     let icon: String
@@ -164,28 +164,57 @@ private struct ROGSettingsSection<Content: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(HUDTheme.rogCyan)
-                Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(HUDTheme.textPrimary)
+        VStack(alignment: .leading, spacing: 0) {
+            // Section label (like design mockup)
+            HStack {
+                ROGSettingsSectionLabel(title: title.uppercased(), icon: icon)
+                Spacer()
             }
+            .padding(.horizontal, 14)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
 
-            content
+            // Divider
+            Rectangle()
+                .fill(HUDTheme.rogRed.opacity(0.3))
+                .frame(height: 1)
+                .padding(.horizontal, 14)
+
+            // Content
+            VStack(spacing: 0) {
+                content
+            }
+            .padding(14)
         }
-        .padding(14)
         .background(Color.black.opacity(0.55))
         .overlay(
             RoundedRectangle(cornerRadius: HUDTheme.cornerRadius)
-                .stroke(HUDTheme.borderSoft, lineWidth: HUDTheme.borderWidth)
+                .stroke(HUDTheme.rogRed.opacity(0.5), lineWidth: 1.5)
         )
-        .shadow(color: HUDTheme.glowSoft, radius: 14, x: 0, y: 0)
-        .overlay(HUDScanlineOverlay(opacity: 0.04))
         .cornerRadius(HUDTheme.cornerRadius)
+    }
+}
+
+// MARK: - ROG Settings Section Label (Matching design mockup)
+private struct ROGSettingsSectionLabel: View {
+    let title: String
+    let icon: String
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(HUDTheme.rogRed)
+            Text(title)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(HUDTheme.rogRed)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(
+            RoundedRectangle(cornerRadius: 4)
+                .stroke(HUDTheme.rogRed, lineWidth: 1.5)
+        )
     }
 }
 

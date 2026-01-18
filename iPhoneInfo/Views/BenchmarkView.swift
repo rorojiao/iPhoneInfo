@@ -150,7 +150,7 @@ struct BenchmarkView: View {
                                     TestItemRow(icon: "internaldrive", name: "存储读写测试", duration: "~5秒")
                                 }
                             }
-                            .background(Color(.secondarySystemBackground))
+                            .background(Color.black.opacity(0.5))
                             .cornerRadius(12)
                             .padding(.horizontal)
                         }
@@ -169,7 +169,7 @@ struct BenchmarkView: View {
                             }
                             .padding()
                             .frame(maxWidth: .infinity)
-                            .background(Color(.secondarySystemBackground))
+                            .background(Color.black.opacity(0.5))
                             .cornerRadius(12)
                             .padding(.horizontal)
                         }
@@ -309,7 +309,7 @@ struct PerformanceLevelCard: View {
                 .multilineTextAlignment(.leading)
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color.black.opacity(0.5))
         .cornerRadius(12)
     }
 
@@ -384,7 +384,7 @@ struct DetailedReportView: View {
                     Text(result.description)
                         .font(.system(.body, design: .monospaced))
                         .padding()
-                        .background(Color(.secondarySystemBackground))
+                        .background(Color.black.opacity(0.5))
                         .cornerRadius(8)
                 }
                 .padding()

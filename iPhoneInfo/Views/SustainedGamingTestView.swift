@@ -167,7 +167,7 @@ private struct ROGTestHeader: View {
     }
 }
 
-// MARK: - ROG Stability Gauge
+// MARK: - ROG Stability Gauge (Matching design mockup)
 private struct ROGStabilityGauge: View {
     let value: Double
     let subtitle: String
@@ -176,55 +176,100 @@ private struct ROGStabilityGauge: View {
     var body: some View {
         VStack(spacing: 12) {
             ZStack {
+                // Outer glow ring
+                Circle()
+                    .stroke(
+                        AngularGradient(
+                            gradient: Gradient(colors: [
+                                HUDTheme.rogRed.opacity(0.8),
+                                HUDTheme.rogCyan.opacity(0.3),
+                                HUDTheme.rogRed.opacity(0.8)
+                            ]),
+                            center: .center
+                        ),
+                        lineWidth: 4
+                    )
+                    .frame(width: 220, height: 220)
+                    .blur(radius: 4)
+
+                // Background circle
+                Circle()
+                    .fill(Color.black.opacity(0.6))
+                    .frame(width: 200, height: 200)
+
                 // Background ring
                 Circle()
-                    .stroke(Color.white.opacity(0.1), lineWidth: 16)
-                    .frame(width: 200, height: 200)
+                    .stroke(Color.white.opacity(0.1), lineWidth: 10)
+                    .frame(width: 185, height: 185)
 
                 // Progress ring
                 Circle()
                     .trim(from: 0, to: min(value / 100.0, 1.0))
                     .stroke(
                         LinearGradient(
-                            colors: [HUDTheme.rogRed, HUDTheme.neonOrange],
+                            colors: [HUDTheme.rogRed, HUDTheme.rogCyan],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
-                        style: StrokeStyle(lineWidth: 16, lineCap: .round)
+                        style: StrokeStyle(lineWidth: 10, lineCap: .round)
                     )
-                    .frame(width: 200, height: 200)
+                    .frame(width: 185, height: 185)
                     .rotationEffect(.degrees(-90))
                     .shadow(color: HUDTheme.rogRed.opacity(0.5), radius: 12, x: 0, y: 0)
                     .animation(.spring(response: 0.5), value: value)
 
                 // Center content
-                VStack(spacing: 4) {
-                    Text("\(Int(value))")
-                        .font(.system(size: 56, weight: .bold, design: .monospaced))
+                VStack(spacing: 2) {
+                    // Heartbeat icon
+                    Image(systemName: "waveform.path.ecg")
+                        .font(.system(size: 20))
+                        .foregroundColor(HUDTheme.rogRed)
+
+                    Text("\(Int(value))%")
+                        .font(.system(size: 52, weight: .bold, design: .monospaced))
                         .foregroundColor(HUDTheme.textPrimary)
 
-                    Text("%")
-                        .font(.system(size: 20, weight: .semibold))
+                    Text("STABILITY")
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(HUDTheme.textSecondary)
+                        .tracking(2)
 
                     if isRunning {
                         HStack(spacing: 4) {
                             Circle()
                                 .fill(HUDTheme.rogRed)
-                                .frame(width: 8, height: 8)
+                                .frame(width: 6, height: 6)
                             Text("测试中")
-                                .font(.caption)
+                                .font(.system(size: 11))
                                 .foregroundColor(HUDTheme.rogRed)
                         }
+                        .padding(.top, 2)
                     }
+                }
+
+                // Corner decorations
+                ForEach(0..<4, id: \.self) { i in
+                    Circle()
+                        .fill(HUDTheme.rogRed)
+                        .frame(width: 6, height: 6)
+                        .offset(y: -110)
+                        .rotationEffect(.degrees(Double(i) * 90))
                 }
             }
 
-            Text(subtitle)
-                .font(.subheadline)
-                .foregroundColor(HUDTheme.textSecondary)
+            // Max/Min display
+            HStack(spacing: 20) {
+                Text("Max: \(Int(min(value + 6, 100)))%")
+                    .font(.system(size: 12, design: .monospaced))
+                    .foregroundColor(HUDTheme.textSecondary)
+                Text("•")
+                    .foregroundColor(HUDTheme.rogRed)
+                Text("Min: \(Int(max(value - 10, 0)))%")
+                    .font(.system(size: 12, design: .monospaced))
+                    .foregroundColor(HUDTheme.textSecondary)
+            }
         }
-        .padding(.vertical, 20)
+        .padding(.vertical, 16)
     }
 }
 
