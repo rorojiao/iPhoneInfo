@@ -229,22 +229,22 @@ private struct ROGStatsGrid: View {
                 chartData: nil
             )
 
-            // GPU Card
+            // GPU Card - iOS 无公开API获取真实GPU使用率
             ROGStatCard(
                 icon: "cube",
                 title: "GPU",
                 value: String(format: "%.0f%%", snapshot.gpuUsage),
-                subtitle: "使用率",
+                subtitle: "估算值",
                 accentColor: HUDTheme.rogRed,
                 chartData: nil
             )
 
-            // Temperature Card
+            // Temperature Card - 基于热状态估算
             ROGStatCard(
                 icon: "thermometer",
                 title: "TEMP",
                 value: String(format: "%.0f°C", thermalService.currentTemperature),
-                subtitle: thermalService.thermalState.rawValue,
+                subtitle: "\(thermalService.thermalState.rawValue)(估算)",
                 accentColor: thermalService.thermalState.color,
                 chartData: nil
             )

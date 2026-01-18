@@ -23,11 +23,15 @@
 - Background: `iPhoneInfo/Views/HUD/HUDBg.swift` (已设置 allowsHitTesting(false))
 
 ## Recent Changes (2026-01-19)
-- 修复稳定性测试页面交互问题：HUDBg 添加 allowsHitTesting(false)
+- 修复稳定性测试页面交互问题：
+  - HUDBg 添加 allowsHitTesting(false)
+  - 渐变覆盖层添加 allowsHitTesting(false)
+  - 添加 ScrollView 支持滚动
 - 电池数据真实化：移除虚假估算值，循环次数/健康度显示"系统设置查看"
+- GPU/温度标记为"估算值"：iOS 无公开 API 获取真实数据
 - BenchmarkView 风格统一：系统颜色替换为 ROG 主题色
+- MonitorView GPU 卡片添加估算说明
 - iOS 26 适配：UIScreen.main 替换为 getCurrentScreen() 辅助函数
-- 所有界面风格统一
 
 ## iOS API 限制
 - 电池循环次数：无公开 API，需在系统设置 > 电池 > 电池健康查看

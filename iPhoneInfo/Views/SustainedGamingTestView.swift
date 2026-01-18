@@ -20,7 +20,7 @@ struct SustainedGamingTestView: View {
         ZStack {
             HUDBg()
 
-            // Accent gradient overlay
+            // Accent gradient overlay - 确保不阻止触摸
             LinearGradient(
                 colors: [HUDTheme.rogRed.opacity(0.15), Color.clear],
                 startPoint: .topTrailing,
@@ -28,55 +28,58 @@ struct SustainedGamingTestView: View {
             )
             .blendMode(.screen)
             .ignoresSafeArea()
+            .allowsHitTesting(false)
 
-            VStack(spacing: 16) {
-                // Header
-                ROGTestHeader(
-                    phase: benchmarkCoordinator.sustainedPhase,
-                    onCancel: { showCancelConfirm = true }
-                )
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 16) {
+                    // Header
+                    ROGTestHeader(
+                        phase: benchmarkCoordinator.sustainedPhase,
+                        onCancel: { showCancelConfirm = true }
+                    )
 
-                // Main gauge section
-                ROGStabilityGauge(
-                    value: stabilityPercent,
-                    subtitle: stabilitySubtitle,
-                    isRunning: benchmarkCoordinator.isSustainedRunning
-                )
+                    // Main gauge section
+                    ROGStabilityGauge(
+                        value: stabilityPercent,
+                        subtitle: stabilitySubtitle,
+                        isRunning: benchmarkCoordinator.isSustainedRunning
+                    )
 
-                // Quick stats row
-                ROGQuickStatsRow(
-                    performance: dashboard.snapshot.performancePercent,
-                    stability: dashboard.snapshot.realtimeStabilityPercent,
-                    temperature: dashboard.snapshot.temperatureCelsius
-                )
+                    // Quick stats row
+                    ROGQuickStatsRow(
+                        performance: dashboard.snapshot.performancePercent,
+                        stability: dashboard.snapshot.realtimeStabilityPercent,
+                        temperature: dashboard.snapshot.temperatureCelsius
+                    )
 
-                // Live status panel
-                ROGLiveStatusPanel(snapshot: dashboard.snapshot)
+                    // Live status panel
+                    ROGLiveStatusPanel(snapshot: dashboard.snapshot)
 
-                // Result summary (if completed)
-                if let result = benchmarkCoordinator.sustainedResult, !benchmarkCoordinator.isSustainedRunning {
-                    ROGResultSummary(result: result)
-                }
-
-                Spacer(minLength: 0)
-
-                // Footer with progress and action button
-                ROGTestFooter(
-                    progress: benchmarkCoordinator.sustainedProgress,
-                    isRunning: benchmarkCoordinator.isSustainedRunning,
-                    onAction: {
-                        if benchmarkCoordinator.isSustainedRunning {
-                            showCancelConfirm = true
-                        } else {
-                            appState.currentTab = .home
-                            dismiss()
-                        }
+                    // Result summary (if completed)
+                    if let result = benchmarkCoordinator.sustainedResult, !benchmarkCoordinator.isSustainedRunning {
+                        ROGResultSummary(result: result)
                     }
-                )
+
+                    Spacer(minLength: 20)
+
+                    // Footer with progress and action button
+                    ROGTestFooter(
+                        progress: benchmarkCoordinator.sustainedProgress,
+                        isRunning: benchmarkCoordinator.isSustainedRunning,
+                        onAction: {
+                            if benchmarkCoordinator.isSustainedRunning {
+                                showCancelConfirm = true
+                            } else {
+                                appState.currentTab = .home
+                                dismiss()
+                            }
+                        }
+                    )
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 20)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .padding(.bottom, 20)
         }
         .overlay(HUDScanlineOverlay(opacity: 0.05).ignoresSafeArea().allowsHitTesting(false))
         .interactiveDismissDisabled(benchmarkCoordinator.isSustainedRunning)

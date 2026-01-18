@@ -241,11 +241,17 @@ private struct ROGGPUMonitorCard: View {
     let gpuUsage: Double
 
     var body: some View {
-        ROGCard(title: "GPU 使用率", accent: HUDTheme.neonGreen) {
-            HStack {
-                Spacer()
-                ROGCircularGauge(value: gpuUsage, maxValue: 100, color: HUDTheme.neonGreen, label: "GPU")
-                Spacer()
+        ROGCard(title: "GPU 使用率 (估算)", accent: HUDTheme.neonGreen) {
+            VStack(spacing: 8) {
+                HStack {
+                    Spacer()
+                    ROGCircularGauge(value: gpuUsage, maxValue: 100, color: HUDTheme.neonGreen, label: "GPU")
+                    Spacer()
+                }
+                
+                Text("iOS 无公开 API 获取真实 GPU 使用率")
+                    .font(.caption2)
+                    .foregroundColor(HUDTheme.textSecondary.opacity(0.7))
             }
         }
     }
