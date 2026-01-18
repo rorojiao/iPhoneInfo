@@ -45,11 +45,11 @@ struct SustainedGamingTestView: View {
                         isRunning: benchmarkCoordinator.isSustainedRunning
                     )
 
-                    // Quick stats row
+                    // Quick stats row (只显示真实数据)
                     ROGQuickStatsRow(
                         performance: dashboard.snapshot.performancePercent,
                         stability: dashboard.snapshot.realtimeStabilityPercent,
-                        temperature: dashboard.snapshot.temperatureCelsius
+                        thermalState: dashboard.snapshot.thermalState
                     )
 
                     // Live status panel
@@ -276,11 +276,11 @@ private struct ROGStabilityGauge: View {
     }
 }
 
-// MARK: - ROG Quick Stats Row
+// MARK: - ROG Quick Stats Row (只显示真实数据)
 private struct ROGQuickStatsRow: View {
     let performance: Double?
     let stability: Double?
-    let temperature: Double?
+    let thermalState: String
 
     var body: some View {
         HStack(spacing: 12) {
@@ -295,10 +295,19 @@ private struct ROGQuickStatsRow: View {
                 color: HUDTheme.rogRed
             )
             ROGQuickStat(
-                title: "温度",
-                value: temperature.map { "\(Int($0))°C" } ?? "--",
-                color: HUDTheme.neonOrange
+                title: "热状态",
+                value: thermalState,
+                color: thermalColor
             )
+        }
+    }
+
+    private var thermalColor: Color {
+        switch thermalState {
+        case "正常": return HUDTheme.neonGreen
+        case "温热": return .yellow
+        case "发热": return HUDTheme.neonOrange
+        default: return HUDTheme.rogRed
         }
     }
 }
@@ -331,7 +340,7 @@ private struct ROGQuickStat: View {
     }
 }
 
-// MARK: - ROG Live Status Panel
+// MARK: - ROG Live Status Panel (只显示真实数据)
 private struct ROGLiveStatusPanel: View {
     let snapshot: GamerDashboardService.Snapshot
 
@@ -344,7 +353,7 @@ private struct ROGLiveStatusPanel: View {
                 Divider().background(Color.white.opacity(0.1))
                 ROGStatusRow(label: "内存", value: "\(Int(snapshot.memoryUsage))%")
                 Divider().background(Color.white.opacity(0.1))
-                ROGStatusRow(label: "GPU(估算)", value: "\(Int(snapshot.gpuUsage))%")
+                ROGStatusRow(label: "电量", value: "\(snapshot.batteryLevelPercent)%")
                 Divider().background(Color.white.opacity(0.1))
                 ROGStatusRow(label: "网络延迟", value: formatMs(snapshot.latencyMs))
                 Divider().background(Color.white.opacity(0.1))
@@ -426,8 +435,6 @@ private struct ROGResultSummary: View {
                 Divider().background(Color.white.opacity(0.1))
 
                 ROGStatusRow(label: "稳定性", value: "\(String(format: "%.1f", result.stabilityPercent))%", color: stabilityColor)
-                Divider().background(Color.white.opacity(0.1))
-                ROGStatusRow(label: "CPU 降速(估算)", value: "\(String(format: "%.1f", result.cpuSpeedDropPercent))%")
                 Divider().background(Color.white.opacity(0.1))
                 ROGStatusRow(label: "热状态变化", value: "\(result.thermalStateStart) → \(result.thermalStateEnd)")
                 Divider().background(Color.white.opacity(0.1))

@@ -49,7 +49,6 @@
 		A92 /* GameExperienceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91 /* GameExperienceService.swift */; };
 		A93 /* NetworkLatencyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A94 /* NetworkLatencyService.swift */; };
 		A95 /* GamerDashboardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A96 /* GamerDashboardService.swift */; };
-		A98 /* GamerHomeDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A97 /* GamerHomeDashboardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -96,7 +95,6 @@
 		A91 /* GameExperienceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameExperienceService.swift; sourceTree = "<group>"; };
 		A94 /* NetworkLatencyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkLatencyService.swift; sourceTree = "<group>"; };
 		A96 /* GamerDashboardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamerDashboardService.swift; sourceTree = "<group>"; };
-		A97 /* GamerHomeDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamerHomeDashboardView.swift; sourceTree = "<group>"; };
 		A99 /* SustainedGamingTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SustainedGamingTestView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -203,7 +201,6 @@
 			isa = PBXGroup;
 			children = (
 				A10 /* HomeView.swift */,
-				A97 /* GamerHomeDashboardView.swift */,
 				A99 /* SustainedGamingTestView.swift */,
 				A110 /* HUD */,
 				A12 /* BenchmarkView.swift */,
@@ -321,7 +318,6 @@
 				A92 /* GameExperienceService.swift in Sources */,
 				A93 /* NetworkLatencyService.swift in Sources */,
 				A95 /* GamerDashboardService.swift in Sources */,
-				A98 /* GamerHomeDashboardView.swift in Sources */,
 				A100 /* SustainedGamingTestView.swift in Sources */,
 				A111 /* HUDTheme.swift in Sources */,
 				A112 /* HUDPanel.swift in Sources */,

@@ -165,7 +165,7 @@ struct BenchmarkView: View {
 
                             HStack(spacing: 30) {
                                 StatusItem(icon: "battery.100", label: "电量", value: "\(Int(UIDevice.current.batteryLevel * 100))%")
-                                StatusItem(icon: "thermometer", label: "温度", value: "\(Int(ThermalService.shared.currentTemperature))°C")
+                                StatusItem(icon: "flame", label: "热状态", value: ThermalService.shared.thermalState.rawValue)
                             }
                             .padding()
                             .frame(maxWidth: .infinity)

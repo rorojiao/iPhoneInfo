@@ -18,7 +18,6 @@ struct MonitorView: View {
         case game = "游戏"
         case cpu = "CPU"
         case memory = "内存"
-        case gpu = "GPU"
         case battery = "电池"
         case network = "网络"
     }
@@ -44,10 +43,8 @@ struct MonitorView: View {
                                 ROGCPUMonitorCard(cpuUsage: metrics.cpuUsage)
                             case .memory:
                                 ROGMemoryMonitorCard(memoryUsage: metrics.memoryUsage)
-                            case .gpu:
-                                ROGGPUMonitorCard(gpuUsage: metrics.gpuUsage)
                             case .battery:
-                                ROGBatteryMonitorCard(batteryLevel: Double(metrics.batteryLevel) * 100, temperature: thermalToCelsius(metrics.thermalState))
+                                ROGBatteryMonitorCard(batteryLevel: Double(metrics.batteryLevel) * 100, thermalState: metrics.processThermalState)
                             case .network:
                                 ROGNetworkMonitorCard(wifiIP: metrics.wifiIP, cellularIP: metrics.cellularIP)
                             }
@@ -151,8 +148,7 @@ private struct ROGAllMonitorsView: View {
             ROGGameMonitorCard(assessment: gameAssessment)
             ROGCPUMonitorCard(cpuUsage: metrics.cpuUsage)
             ROGMemoryMonitorCard(memoryUsage: metrics.memoryUsage)
-            ROGGPUMonitorCard(gpuUsage: metrics.gpuUsage)
-            ROGBatteryMonitorCard(batteryLevel: Double(metrics.batteryLevel) * 100, temperature: thermalToCelsius(metrics.thermalState))
+            ROGBatteryMonitorCard(batteryLevel: Double(metrics.batteryLevel) * 100, thermalState: metrics.processThermalState)
             ROGNetworkMonitorCard(wifiIP: metrics.wifiIP, cellularIP: metrics.cellularIP)
         }
     }
@@ -236,31 +232,10 @@ private struct ROGMemoryMonitorCard: View {
     }
 }
 
-// MARK: - ROG GPU Monitor Card
-private struct ROGGPUMonitorCard: View {
-    let gpuUsage: Double
-
-    var body: some View {
-        ROGCard(title: "GPU 使用率 (估算)", accent: HUDTheme.neonGreen) {
-            VStack(spacing: 8) {
-                HStack {
-                    Spacer()
-                    ROGCircularGauge(value: gpuUsage, maxValue: 100, color: HUDTheme.neonGreen, label: "GPU")
-                    Spacer()
-                }
-                
-                Text("iOS 无公开 API 获取真实 GPU 使用率")
-                    .font(.caption2)
-                    .foregroundColor(HUDTheme.textSecondary.opacity(0.7))
-            }
-        }
-    }
-}
-
 // MARK: - ROG Battery Monitor Card
 private struct ROGBatteryMonitorCard: View {
     let batteryLevel: Double
-    let temperature: Double
+    let thermalState: ProcessInfo.ThermalState
 
     var body: some View {
         ROGCard(title: "电池状态", accent: HUDTheme.neonOrange) {
@@ -280,13 +255,13 @@ private struct ROGBatteryMonitorCard: View {
                 }
 
                 VStack(spacing: 8) {
-                    Image(systemName: "thermometer")
+                    Image(systemName: "flame")
                         .font(.system(size: 32))
-                        .foregroundColor(temperatureColor)
-                    Text(String(format: "%.0f°C", temperature))
-                        .font(.system(size: 28, weight: .bold, design: .monospaced))
+                        .foregroundColor(thermalColor)
+                    Text(thermalStateName)
+                        .font(.system(size: 22, weight: .bold))
                         .foregroundColor(HUDTheme.textPrimary)
-                    Text("温度")
+                    Text("热状态")
                         .font(.caption)
                         .foregroundColor(HUDTheme.textSecondary)
                 }
@@ -303,10 +278,24 @@ private struct ROGBatteryMonitorCard: View {
         return HUDTheme.rogRed
     }
 
-    private var temperatureColor: Color {
-        if temperature < 40 { return HUDTheme.neonGreen }
-        if temperature < 45 { return HUDTheme.neonOrange }
-        return HUDTheme.rogRed
+    private var thermalColor: Color {
+        switch thermalState {
+        case .nominal: return HUDTheme.neonGreen
+        case .fair: return .yellow
+        case .serious: return HUDTheme.neonOrange
+        case .critical: return HUDTheme.rogRed
+        @unknown default: return HUDTheme.textSecondary
+        }
+    }
+
+    private var thermalStateName: String {
+        switch thermalState {
+        case .nominal: return "正常"
+        case .fair: return "温热"
+        case .serious: return "发热"
+        case .critical: return "过热"
+        @unknown default: return "未知"
+        }
     }
 }
 
@@ -449,20 +438,12 @@ struct MemoryMonitorCard: View {
     }
 }
 
-struct GPUMonitorCard: View {
-    let gpuUsage: Double
-
-    var body: some View {
-        ROGGPUMonitorCard(gpuUsage: gpuUsage)
-    }
-}
-
 struct BatteryMonitorCard: View {
     let batteryLevel: Double
-    let temperature: Double
+    let thermalState: ProcessInfo.ThermalState
 
     var body: some View {
-        ROGBatteryMonitorCard(batteryLevel: batteryLevel, temperature: temperature)
+        ROGBatteryMonitorCard(batteryLevel: batteryLevel, thermalState: thermalState)
     }
 }
 

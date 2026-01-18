@@ -197,7 +197,7 @@ private struct ROGMainGauge: View {
     }
 }
 
-// MARK: - ROG Stats Grid (2x3 grid like design mockup)
+// MARK: - ROG Stats Grid (只显示真实可获取的数据)
 private struct ROGStatsGrid: View {
     let snapshot: GamerDashboardService.Snapshot
     let batteryInfo: BatteryInfo?
@@ -209,7 +209,7 @@ private struct ROGStatsGrid: View {
             GridItem(.flexible(), spacing: 12),
             GridItem(.flexible(), spacing: 12)
         ], spacing: 12) {
-            // CPU Card
+            // CPU Card - 真实数据
             ROGStatCard(
                 icon: "cpu",
                 title: "CPU",
@@ -219,7 +219,7 @@ private struct ROGStatsGrid: View {
                 chartData: nil
             )
 
-            // Memory Card
+            // Memory Card - 真实数据
             ROGStatCard(
                 icon: "memorychip",
                 title: "MEMORY",
@@ -229,27 +229,7 @@ private struct ROGStatsGrid: View {
                 chartData: nil
             )
 
-            // GPU Card - iOS 无公开API获取真实GPU使用率
-            ROGStatCard(
-                icon: "cube",
-                title: "GPU",
-                value: String(format: "%.0f%%", snapshot.gpuUsage),
-                subtitle: "估算值",
-                accentColor: HUDTheme.rogRed,
-                chartData: nil
-            )
-
-            // Temperature Card - 基于热状态估算
-            ROGStatCard(
-                icon: "thermometer",
-                title: "TEMP",
-                value: String(format: "%.0f°C", thermalService.currentTemperature),
-                subtitle: "\(thermalService.thermalState.rawValue)(估算)",
-                accentColor: thermalService.thermalState.color,
-                chartData: nil
-            )
-
-            // Battery Card
+            // Battery Card - 真实数据
             ROGStatCard(
                 icon: batteryIcon,
                 title: "BATTERY",
@@ -259,15 +239,64 @@ private struct ROGStatsGrid: View {
                 chartData: nil
             )
 
-            // Cycle Count Card
+            // Thermal State Card - 真实数据 (ProcessInfo.thermalState)
             ROGStatCard(
-                icon: "arrow.triangle.2.circlepath",
-                title: "CYCLES",
-                value: batteryInfo?.cycleCount.map { "\($0)" } ?? "—",
-                subtitle: batteryInfo?.cycleCount == nil ? "需在系统查看" : "充电循环",
-                accentColor: HUDTheme.neonGreen,
+                icon: "flame",
+                title: "THERMAL",
+                value: thermalService.thermalState.rawValue,
+                subtitle: "热状态",
+                accentColor: thermalService.thermalState.color,
                 chartData: nil
             )
+
+            // Low Power Mode Card - 真实数据
+            ROGStatCard(
+                icon: batteryInfo?.isLowPowerModeEnabled == true ? "bolt.slash" : "bolt",
+                title: "POWER",
+                value: batteryInfo?.isLowPowerModeEnabled == true ? "省电" : "正常",
+                subtitle: "电源模式",
+                accentColor: batteryInfo?.isLowPowerModeEnabled == true ? HUDTheme.neonOrange : HUDTheme.neonGreen,
+                chartData: nil
+            )
+
+            // Charging State Card - 真实数据
+            ROGStatCard(
+                icon: chargingIcon,
+                title: "CHARGE",
+                value: chargingValue,
+                subtitle: "充电状态",
+                accentColor: chargingColor,
+                chartData: nil
+            )
+        }
+    }
+
+    private var chargingIcon: String {
+        guard let battery = batteryInfo else { return "battery.0percent" }
+        switch battery.state {
+        case .charging: return "battery.100percent.bolt"
+        case .full: return "checkmark.circle.fill"
+        case .unplugged: return "powerplug"
+        default: return "questionmark.circle"
+        }
+    }
+
+    private var chargingValue: String {
+        guard let battery = batteryInfo else { return "未知" }
+        switch battery.state {
+        case .charging: return "充电中"
+        case .full: return "已充满"
+        case .unplugged: return "未充电"
+        default: return "未知"
+        }
+    }
+
+    private var chargingColor: Color {
+        guard let battery = batteryInfo else { return HUDTheme.textSecondary }
+        switch battery.state {
+        case .charging: return HUDTheme.neonGreen
+        case .full: return HUDTheme.rogCyan
+        default: return HUDTheme.textSecondary
         }
     }
 
@@ -566,13 +595,12 @@ private struct ROGDeviceInfoSection: View {
                 Divider().background(HUDTheme.rogRed.opacity(0.3))
 
                 VStack(spacing: 0) {
+                    // 只显示真实可获取的设备信息
                     ROGInfoRow(icon: "iphone", label: "型号", value: extendedInfo?.marketingName ?? deviceInfo?.deviceType ?? "Unknown")
                     ROGInfoRow(icon: "cpu", label: "芯片", value: hardwareInfo?.cpuModel ?? "Unknown")
                     ROGInfoRow(icon: "memorychip", label: "内存", value: String(format: "%.0f GB", hardwareInfo?.totalMemoryGB ?? 0))
                     ROGInfoRow(icon: "internaldrive", label: "存储", value: String(format: "%.0f GB", hardwareInfo?.totalStorageGB ?? 0))
-                    ROGInfoRow(icon: "battery.100percent", label: "电池健康", value: batteryInfo?.health.map { "\($0)%" } ?? "系统设置查看")
-                    ROGInfoRow(icon: "arrow.triangle.2.circlepath", label: "循环次数", value: batteryInfo?.cycleCount.map { "\($0) 次" } ?? "系统设置查看")
-                    ROGInfoRow(icon: "thermometer", label: "电池温度", value: batteryInfo?.temperature.map { String(format: "%.1f°C", $0) } ?? "未知")
+                    ROGInfoRow(icon: "applelogo", label: "系统版本", value: "iOS \(deviceInfo?.systemVersion ?? "Unknown")")
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
